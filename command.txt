@@ -1,0 +1,4 @@
+
+./ngrok authtoken 1lbN4tTfKuNwnFY3z7g1Nr6j5BF_6XZqbBRpNvmkicpPqyJRY
+
+./ngrok tcp 22
