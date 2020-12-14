@@ -3,7 +3,7 @@ import os
 import json
 
 if __name__ == "__main__":
-    print("==================== SERVER EBIKES ===================== \n")
+    print("==================== SERVER SECURE ELEVATORS ===================== \n")
     lora = LoraEndpoint()
     while True:
         try:
