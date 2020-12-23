@@ -4,13 +4,14 @@ import os
 import json
 from time import sleep
 import configparser
+from properties import STATIC_CONFIGURATION_FILE
 
 if __name__ == "__main__":
     print("==================== SERVER SECURE ELEVATORS ===================== \n")
     #lora = LoraEndpoint()
 
     config = configparser.RawConfigParser()
-    config.read('ConfigFile.properties')
+    config.read(STATIC_CONFIGURATION_FILE)
     code = config.get('ElevatorSection', 'elevator.code')
     elevator = Elevator(code)
 
@@ -29,8 +30,6 @@ if __name__ == "__main__":
             pass
 
         sleep(10)
-
-    print(f"Elevator had an exception {elevator.exceptions}")
 
 def decode_data(data: bytes) -> str:
     return data.decode()
