@@ -1,26 +1,16 @@
 import json
-import requests 
-import configparser
-from properties import GENERAL_URL, ACTIVE_CONFIGURATION_FILE
-
-class SingletonMeta(type):
-    _instances = {}
-
-    def __call__(cls, *args, **kwargs):
-        if cls not in cls._instances:
-            instance = super().__call__(*args, **kwargs)
-            cls._instances[cls] = instance
-        return cls._instances[cls]
-
+from logic.singleton import SingletonMeta
+from func.properties import Properties
 
 class Elevator(metaclass=SingletonMeta):
     code = None
+    config = None
     functionalities = []
     floors = []
     capacity = None
+
     where = None
     status = False
-    exceptions = []
 
     #INITIALIZATION
     def __init__(self, code):
@@ -28,65 +18,26 @@ class Elevator(metaclass=SingletonMeta):
         print(f"ELEV: Initializing elevator {self.code}")
         #Get configuration from backend or file
         if self.activate():
+            self.status = True
             print("ELEV: Started successfully")
         else:
+            self.status = False
             print("ELEV: Error")
         #Go to first floor
         self.call(0)
-    
-    #ELEVATOR CONFIGURATION STUFF
-    @property
-    def configuration_url(self):
-        return GENERAL_URL + str(self.code)
 
     def activate(self):
-        if self.get_from_backend():
-            self.status = True
-        elif self.get_config_from_file():
-            self.status = True
-        else:
-            self.status = False
-        return self.status
+        self.config = Properties().get_elevator_configuration_from_backend()
+        if not self.config:
+            self.config = Properties().get_elevator_configuration_from_file()
+        return self.apply_config()
 
-    def get_from_backend(self):
-        print(f"ELEV: Getting configuration from backend")
-        r = requests.get(url = self.configuration_url) 
+    def apply_config(self):
         try:
-            data = r.json()
-            self.functionalities = data['activeFunctionalities']
-            self.floors = data['activeFloors']
-            self.capacity = data['capacity']
-            return self.save_configuration_file()
-
-        except Exception as e:
-            raise e
-            return False
-    
-    def save_configuration_file(self):
-        print(f"ELEV: Saving configuration file")
-        try:
-            config = configparser.ConfigParser()
-            config['DEFAULT']['FUNCTIONALITIES'] = json.dumps(self.functionalities)
-            config['DEFAULT']['FLOORS'] = json.dumps(self.floors)
-            config['DEFAULT']['CAPACITY'] = str(self.capacity)
-
-            with open(ACTIVE_CONFIGURATION_FILE, 'w') as configfile:
-                config.write(configfile)
+            self.functionalities = json.loads(self.config['DEFAULT']['FUNCTIONALITIES'])
+            self.floors = json.loads(self.config['DEFAULT']['FUNCTIONALITIES'])
+            self.capacity = int(self.config['DEFAULT']['CAPACITY'])
             return True
-
-        except Exception as e:
-            raise e
-            return False
-
-    def get_config_from_file(self):
-        print(f"ELEV: Getting configuration from file")
-        try:
-            config = configparser.ConfigParser()
-            config.read(ACTIVE_CONFIGURATION_FILE)
-            self.functionalities = json.loads(config['DEFAULT']['FUNCTIONALITIES'])
-            self.floors = json.loads(config['DEFAULT']['FUNCTIONALITIES'])
-            self.capacity = int(config['DEFAULT']['CAPACITY'])
-            
         except Exception as e:
             raise e
             return False
