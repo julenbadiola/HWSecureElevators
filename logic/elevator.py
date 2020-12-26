@@ -37,7 +37,7 @@ class Elevator(metaclass=SingletonMeta):
             self.capacity = int(config['DEFAULT']['CAPACITY'])
             return True
         except Exception as e:
-            print("ELEV: Could not get configuration.")
+            print("ELEV: Could not set configuration. The configuration does not exist or is corrupt.")
             return False        
 
     #BUSINESS LOGIC
@@ -78,7 +78,7 @@ class Elevator(metaclass=SingletonMeta):
             self.riding = True
             for i in range(0, diff):
                 sleep(5)
-                print(f"ELEV: Ride to {floor}. Now in {i}")
+                print(f"ELEV: Riding to {floor}. Now in {i}")
 
             self.where = floor
         

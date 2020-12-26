@@ -22,25 +22,26 @@ if __name__ == "__main__":
     elevator = Elevator(properties.elevator_code)
 
     threads = []
-    t = threading.Thread(target=worker, args=(elevator,))
-    threads.append(t)   
-    t.start()
+    if elevator.status:
+        t = threading.Thread(target=worker, args=(elevator,))
+        threads.append(t)   
+        t.start()
 
-    while elevator.status:
-        try:
-            print("Waiting to receive a message...")
-            """
-            encoded_data = lora.read()
-            print(f"Encoded data received: {encoded_data}")
-            decoded_data = decode_data(encoded_data)
-            print(f"Decoded data: {decoded_data}")
-            
-            """
-            elevator.call(random.randint(0,len(elevator.floors) - 1))
-        except:
-            raise
+        while elevator.status:
+            try:
+                print("Waiting to receive a message...")
+                """
+                encoded_data = lora.read()
+                print(f"Encoded data received: {encoded_data}")
+                decoded_data = decode_data(encoded_data)
+                print(f"Decoded data: {decoded_data}")
+                
+                """
+                elevator.call(random.randint(0,len(elevator.floors) - 1))
+            except:
+                raise
 
-        sleep(3)
+            sleep(3)
 
 def decode_data(data: bytes) -> str:
     return data.decode()

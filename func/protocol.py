@@ -1,12 +1,11 @@
 import json
 from typing import Dict
 
-TEMPERATURE_FIELD = "temperature"
+ELEVATOR_CALL = "elevatorcall"
+
+def dump_data(data: Dict) -> str:
+    return json.dumps(data)
 
 
-def dump_sensor_data(sensor_data: Dict) -> str:
-    return json.dumps(sensor_data)
-
-
-def load_data_sensor(data: bytes) -> str:
+def load_data(data: bytes) -> str:
     return data.decode()
