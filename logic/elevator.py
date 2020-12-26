@@ -9,10 +9,13 @@ class Elevator(metaclass=SingletonMeta):
     functionalities = []
     floors = []
     capacity = None
-
-    calls_pool = []
-    where = None
     status = False
+
+    #Functionality
+    calls_pool = []
+    where = 0
+    threads = []
+    riding = False
 
     #INITIALIZATION
     def __init__(self, code):
@@ -21,26 +24,21 @@ class Elevator(metaclass=SingletonMeta):
         #Get configuration from backend or file
         if self.activate():
             self.status = True
-            print("ELEV: Started successfully")
+            print("ELEV: Status = successful.")
         else:
             self.status = False
-            print("ELEV: Error")
-        #Go to first floor
-        self.call(0)
+            print("ELEV: Status = error.")        
 
     def activate(self):
-        self.config = PropertiesManager().get_elevator_configuration()
-        return self.apply_config()
-
-    def apply_config(self):
+        config = PropertiesManager().get_elevator_configuration()
         try:
-            self.functionalities = json.loads(self.config['DEFAULT']['FUNCTIONALITIES'])
-            self.floors = json.loads(self.config['DEFAULT']['FLOORS'])
-            self.capacity = int(self.config['DEFAULT']['CAPACITY'])
+            self.functionalities = json.loads(config['DEFAULT']['FUNCTIONALITIES'])
+            self.floors = json.loads(config['DEFAULT']['FLOORS'])
+            self.capacity = int(config['DEFAULT']['CAPACITY'])
             return True
         except Exception as e:
-            raise e
-            return False
+            print("ELEV: Could not get configuration.")
+            return False        
 
     #BUSINESS LOGIC
     def call(self, where):
@@ -50,24 +48,40 @@ class Elevator(metaclass=SingletonMeta):
                 self.calls_pool.append(where)
             except Exception as e:
                 self.status = False
+        """else:
+            print(f"ELEV: Elevator called from or to disabled floor - {where}")"""
+
+    def check_calls(self):
+        if not self.riding and len(self.calls_pool) > 0:
+            print(f"ELEV: {self.calls_pool}.")
+            toFloor = self.calls_pool[0]
+            if toFloor is not None:
+                self.ride(toFloor)
+        """else:
+            print(f"ELEV: There are not rides.")"""
+
+    def ride(self, floor):
+        if(floor == None):
+            return
+
+        indexFrom = self.floors.index(self.where)
+        indexTo = self.floors.index(floor)
+        
+        if(self.floors[floor] == False):
+            print(f"ELEV: The floor {floor} is disabled.")
+
+        elif(indexFrom == indexTo):
+            print(f"ELEV: Elevator already on floor {floor}.")
+
         else:
-            print(f"ELEV: Elevator called in disabled floor - {where}")
-
-    def ride(self):
-        print(len(self.calls_pool))
-        if len(self.calls_pool) > 0:
-            
-            ride = self.calls_pool[0]
-            
-            indexFrom = self.floors.index(self.where)
-            indexTo = self.floors.index(toFloor)
             diff = abs(indexFrom - indexTo)
+            self.riding = True
+            for i in range(0, diff):
+                sleep(5)
+                print(f"ELEV: Ride to {floor}. Now in {i}")
 
-            print(f"ELEV: Ride to {ride} {indexFrom} {indexTo} {diff}.")
-            for i in range(1, diff):
-                print(f"ELEV: Ride to {ride}. Now in {i}")
-                sleep(1)
-
-            self.where = self.floors[where]
-            self.calls_pool.remove(ride)
-            print(f"ELEV: Ride to {ride} finished.")
+            self.where = floor
+        
+        self.calls_pool.remove(floor)
+        self.riding = False
+        print(f"ELEV: Ride to {floor} finished.")

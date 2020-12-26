@@ -2,17 +2,29 @@ import os
 import json
 from time import sleep
 import random
+import threading
 
 from logic.elevator import Elevator
 from properties.properties import PropertiesManager
 from lora.lora import LoraEndpoint
 
+def worker(elevator):
+    while True:
+        sleep(1)
+        elevator.check_calls()
+
 if __name__ == "__main__":
     print("==================== SERVER SECURE ELEVATORS ===================== \n")
     #Initializing
     #lora = LoraEndpoint()
+    
     properties = PropertiesManager()
     elevator = Elevator(properties.elevator_code)
+
+    threads = []
+    t = threading.Thread(target=worker, args=(elevator,))
+    threads.append(t)   
+    t.start()
 
     while elevator.status:
         try:
@@ -24,13 +36,12 @@ if __name__ == "__main__":
             print(f"Decoded data: {decoded_data}")
             
             """
-            print(elevator.floors)
-            elevator.call(random.randint(0,len(elevator.floors)))
-            elevator.ride()
+            elevator.call(random.randint(0,len(elevator.floors) - 1))
         except:
-            pass
+            raise
 
         sleep(3)
 
 def decode_data(data: bytes) -> str:
     return data.decode()
+

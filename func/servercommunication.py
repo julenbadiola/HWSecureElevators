@@ -6,15 +6,14 @@ def post_to_backend(data):
     pass
 
 def get_from_backend(path):
-    print(f"BACKEND: Getting {path} from backend")
-
     url = str(path)
     r = requests.get(url = url) 
     try:
         data = r.json()
+        print(f"BACKEND: Got data from {path}")
         return data
     
     except Exception as e:
-        raise e
-    return None
+        print(f"BACKEND: Error while getting data from {path} = " + str(e))
+        return None
     

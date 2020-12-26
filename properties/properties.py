@@ -35,21 +35,23 @@ class PropertiesManager(metaclass=SingletonMeta):
         return str(config.get('MAIN', 'CODE'))
 
     def get_elevator_configuration(self):
-        print(f"PROPERT: Getting configuration from backend")
         try:
-            data = get_from_backend(self.backend_url + self.elevator_code)
             config = configparser.RawConfigParser()
             config.read(self.ELEVATOR_CONFIGURATION_FILE)
 
-            #comprobación de si existen los keys
-            config['DEFAULT']['FUNCTIONALITIES'] = json.dumps(data['activeFunctionalities'])
-            config['DEFAULT']['FLOORS'] = json.dumps(data['activeFloors'])
-            config['DEFAULT']['CAPACITY'] = str(data['capacity'])
-            return self.write_config_file(self.ELEVATOR_CONFIGURATION_FILE, config)
-        
+            data = get_from_backend(self.backend_url + self.elevator_code)
+            if data:
+                config['DEFAULT']['FUNCTIONALITIES'] = json.dumps(data['activeFunctionalities'])
+                config['DEFAULT']['FLOORS'] = json.dumps(data['activeFloors'])
+                config['DEFAULT']['CAPACITY'] = str(data['capacity'])
+                return self.write_config_file(self.ELEVATOR_CONFIGURATION_FILE, config)
+            else:
+                return config
+
         except Exception as e:
-            raise e
-            return self.ELEVATOR_CONFIGURATION
+            print(f"PROPERT: Error while trying to get configuration.")
+            return None
+            
     
     #GENERIC
     def write_config_file(self, file, config):
