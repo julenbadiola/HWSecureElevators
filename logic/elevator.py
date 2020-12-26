@@ -1,6 +1,6 @@
 import json
 from logic.singleton import SingletonMeta
-from func.properties import Properties
+from properties.properties import PropertiesManager
 from time import sleep
 
 class Elevator(metaclass=SingletonMeta):
@@ -29,9 +29,7 @@ class Elevator(metaclass=SingletonMeta):
         self.call(0)
 
     def activate(self):
-        self.config = Properties().get_elevator_configuration_from_backend()
-        if not self.config:
-            self.config = Properties().get_elevator_configuration_from_file()
+        self.config = PropertiesManager().get_elevator_configuration()
         return self.apply_config()
 
     def apply_config(self):

@@ -1,15 +1,17 @@
-from lora.lora import LoraEndpoint
-from logic.elevator import Elevator
-from func.properties import Properties
 import os
 import json
 from time import sleep
 import random
 
+from logic.elevator import Elevator
+from properties.properties import PropertiesManager
+from lora.lora import LoraEndpoint
+
 if __name__ == "__main__":
     print("==================== SERVER SECURE ELEVATORS ===================== \n")
+    #Initializing
     #lora = LoraEndpoint()
-    properties = Properties()
+    properties = PropertiesManager()
     elevator = Elevator(properties.elevator_code)
 
     while elevator.status:
