@@ -1,0 +1,2 @@
+https://maker.pro/raspberry-pi/projects/speech-recognition-using-google-speech-api-and-python
+https://realpython.com/python-speech-recognition/
