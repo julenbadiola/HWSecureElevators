@@ -2,6 +2,7 @@ import json
 from logic.singleton import SingletonMeta
 from properties.properties import PropertiesManager
 from time import sleep
+from speech.speechmanager import recognize_speech_from_mic, say
 
 class Elevator(metaclass=SingletonMeta):
     code = None
@@ -44,6 +45,7 @@ class Elevator(metaclass=SingletonMeta):
     def call(self, where):
         if(self.floors[where] == True):
             print(f"ELEV: Elevator called in {where}")
+            say(f"Elevador llamado en el piso {where}")
             try:
                 self.calls_pool.append(where)
             except Exception as e:
@@ -59,6 +61,9 @@ class Elevator(metaclass=SingletonMeta):
                 self.ride(toFloor)
         """else:
             print(f"ELEV: There are not rides.")"""
+
+    def ask_for_input(self):
+        pass
 
     def ride(self, floor):
         if(floor == None):
@@ -78,10 +83,12 @@ class Elevator(metaclass=SingletonMeta):
             self.riding = True
             for i in range(0, diff):
                 sleep(5)
+                say(f"Elevador yendo a {floor}. Ahora en {i}")
                 print(f"ELEV: Riding to {floor}. Now in {i}")
 
+            print(f"ELEV: Ride to {floor} finished.")
             self.where = floor
         
         self.calls_pool.remove(floor)
         self.riding = False
-        print(f"ELEV: Ride to {floor} finished.")
+        

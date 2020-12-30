@@ -8,7 +8,8 @@ from logic.elevator import Elevator
 from properties.properties import PropertiesManager
 from lora.lora import LoraEndpoint
 
-def worker(elevator):
+
+def elevator_calls_worker(elevator):
     while True:
         sleep(1)
         elevator.check_calls()
@@ -23,7 +24,7 @@ if __name__ == "__main__":
 
     threads = []
     if elevator.status:
-        t = threading.Thread(target=worker, args=(elevator,))
+        t = threading.Thread(target=elevator_calls_worker, args=(elevator,))
         threads.append(t)   
         t.start()
 
@@ -41,7 +42,7 @@ if __name__ == "__main__":
             except:
                 raise
 
-            sleep(3)
+            sleep(13)
 
 def decode_data(data: bytes) -> str:
     return data.decode()
