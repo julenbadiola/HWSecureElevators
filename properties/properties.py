@@ -1,7 +1,7 @@
 import json
 import requests 
 import configparser
-from logic.singleton import SingletonMeta
+from logic.Singleton import SingletonMeta
 from func.servercommunication import get_from_backend, post_to_backend
 
 class PropertiesManager(metaclass=SingletonMeta):
