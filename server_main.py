@@ -14,7 +14,7 @@ if __name__ == "__main__":
     elevator = Elevator(properties.elevator_code)    
     elevator.call(0)
 
-    sleep(1)
+    sleep(0.5)
     while elevator.overall_status:
         try:
             #print("Waiting to receive a message...")
@@ -27,7 +27,9 @@ if __name__ == "__main__":
             if not elevator.riding:
                 print('Llamas desde el piso:')
                 x = input()
-                elevator.call(int(x))
+                if not elevator.riding:
+                    elevator.call(int(x))
+                
         except:
             raise
 

@@ -4,6 +4,7 @@ from logic.VoiceAssistant import VoiceAssistant
 import asyncio
 
 r = sr.Recognizer()
+NUM_TRIES = 3
 keyWord = 'piso'
 """
 Quiero ir al piso 1
@@ -38,11 +39,21 @@ def cleanText(text):
     return res
 
 
+def tries_advice(tries_left):
+    tosay = "Vuelva a pronunciarlo. "
+    if tries_left > 1:
+        tosay += f"Quedan {tries_left} intentos"
+    elif tries_left == 1:
+        tosay += f"Queda un intento"
+    else:
+        tosay = f"No he entendido por {NUM_TRIES} veces. Utilice los botones físicos"
+    return tosay
+
 async def wait_voice_input(elevator):
-    done = False
     with sr.Microphone() as source:
         elevator.add_to_voice_assistant('Pronuncie el piso al que desea ir.')
-        while not done: 
+        tries_left = NUM_TRIES
+        while tries_left > 0: 
             audio = r.listen(source)
             try:
                 text = r.recognize_google(audio, language="es-ES")
@@ -54,15 +65,23 @@ async def wait_voice_input(elevator):
                         if len(floors) == 1:
                             #print(f'VOICEREC: {floors} detected in the speech.')
                             floor = floors[0]
-                            if elevator.valid_floor_selection(floor):
+                            if elevator.valid_floor_selection(True, floor):
                                 confirmation = await wait_for_confirmation(f"ir al piso {floor}")
                                 if confirmation:
-                                    elevator.ride(floor)
-                                    done = True
+                                    elevator.ride(True, floor)
+                                    break
+                        else:
+                            tries_left -= 1
                                 
                     except Exception as e:
                         print(e)
+                        tries_left -= 1
 
             except Exception as e:
-                elevator.add_to_voice_assistant('No he entendido. Vuelva a pronunciarlo.')
-        
+                tries_left -= 1
+
+            elevator.add_to_voice_assistant(tries_advice(tries_left))
+
+        print("VOICE RECOGNITION STOPPED")
+        return
+    print("VOICE RECOGNITION STOPPED")
