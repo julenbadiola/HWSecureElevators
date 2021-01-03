@@ -5,7 +5,7 @@ from time import sleep
 
 from logic.Singleton import SingletonMeta
 from logic.VoiceAssistant import VoiceAssistant
-from logic.VoiceRecognition import wait_voice_input
+from logic.VoiceRecognition import wait_voice_input, check_floor_and_ride
 from logic.threading import threaded
 from time import sleep
 import asyncio
@@ -74,12 +74,30 @@ class Elevator(metaclass=SingletonMeta):
             except Exception as e:
                 self.status = False
 
-    def ask_for_input(self):
-        self.voice_recog_thread = self.thread_ask_for_input()
-     
+    def kill_thread(self, thread):
+        if thread:
+            thread.kill()
+            thread.join() 
+        return None
+
+    def onclick_physic_button(self, floor):
+        self.voice_recog_thread = self.kill_thread(self.voice_recog_thread)
+        self.ride(True, floor)
+
+    def ask_for_floor_input(self):
+        #Activamos el reconocimiento por voz
+        self.kill_thread(self.voice_recog_thread)
+        self.voice_recog_thread = self.thread_ask_for_floor_input()
+
+        #Activamos el onclick
+        print('VAS AL PISO:')
+        x = input()
+        self.onclick_physic_button(int(x))
+
     @threaded
-    def thread_ask_for_input(self):
-        asyncio.run(wait_voice_input(self))
+    def thread_ask_for_floor_input(self):
+        self.voice_assistant.add_to_pool('Pronuncie el piso al que desea ir o utilize los botones físicos.')
+        asyncio.run(wait_voice_input(check_floor_and_ride))
 
     def ride(self, destination, floor):
         self.ride_thread = self.thread_ride(destination, floor)
@@ -111,7 +129,7 @@ class Elevator(metaclass=SingletonMeta):
             self.open_doors()
             
             if not destination:
-                self.ask_for_input()
+                self.ask_for_floor_input()
             
         
         print(f"ELEV: Ride to {floor} finished.")

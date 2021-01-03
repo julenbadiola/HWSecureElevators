@@ -29,16 +29,6 @@ async def wait_for_confirmation(reason):
             except Exception as e:
                 return False
 
-def cleanText(text):
-    res = []
-    for s in text.split():
-        r = Text2Int(s)
-        if r is not None:
-            #print(f'VOICEREC: Añadido {r}.')
-            res.append(r)
-    return res
-
-
 def tries_advice(tries_left):
     tosay = "Vuelva a pronunciarlo. "
     if tries_left > 1:
@@ -49,9 +39,32 @@ def tries_advice(tries_left):
         tosay = f"No he entendido por {NUM_TRIES} veces. Utilice los botones físicos"
     return tosay
 
-async def wait_voice_input(elevator):
+def cleanTextForNumbers(text):
+    res = []
+    for s in text.split():
+        r = Text2Int(s)
+        if r is not None:
+            #print(f'VOICEREC: Añadido {r}.')
+            res.append(r)
+    return res
+
+async def check_floor_and_ride(text):
+    elevator = VoiceAssistant().elevator
+    floors = cleanTextForNumbers(text)
+    if len(floors) == 1:
+        #print(f'VOICEREC: {floors} detected in the speech.')
+        floor = floors[0]
+        
+        if elevator.valid_floor_selection(True, floor):
+            confirmation = await wait_for_confirmation(f"ir al piso {floor}")
+            if confirmation:
+                elevator.ride(True, floor)
+                return True
+    return False
+
+async def wait_voice_input(_callback = None):
+    va = VoiceAssistant()
     with sr.Microphone() as source:
-        elevator.add_to_voice_assistant('Pronuncie el piso al que desea ir.')
         tries_left = NUM_TRIES
         while tries_left > 0: 
             audio = r.listen(source)
@@ -60,28 +73,17 @@ async def wait_voice_input(elevator):
                 #print(text.lower())
                 
                 if keyWord.lower() in text.lower():
-                    try:
-                        floors = cleanText(text)
-                        if len(floors) == 1:
-                            #print(f'VOICEREC: {floors} detected in the speech.')
-                            floor = floors[0]
-                            if elevator.valid_floor_selection(True, floor):
-                                confirmation = await wait_for_confirmation(f"ir al piso {floor}")
-                                if confirmation:
-                                    elevator.ride(True, floor)
-                                    break
+                    if _callback:
+                        if await callback(text):
+                            break
                         else:
                             tries_left -= 1
-                                
-                    except Exception as e:
-                        print(e)
-                        tries_left -= 1
 
             except Exception as e:
                 tries_left -= 1
 
-            elevator.add_to_voice_assistant(tries_advice(tries_left))
+            va.add_to_pool(tries_advice(tries_left))
 
-        print("VOICE RECOGNITION STOPPED")
+        #print("VOICE RECOGNITION STOPPED")
         return
-    print("VOICE RECOGNITION STOPPED")
+    #print("VOICE RECOGNITION STOPPED")

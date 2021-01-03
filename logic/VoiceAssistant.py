@@ -8,13 +8,13 @@ from time import sleep
 
 class VoiceAssistant(metaclass=SingletonMeta):
     pool = []
-    threads = []
+    thread = None
     status = False
 
     def __init__(self, elevator):
         self.status = True
         self.elevator = elevator
-        self.threads.append(self.thread_check_pool())
+        self.thread = self.thread_check_pool()
         
     def add_to_pool(self, string):
         self.pool.append(string)
