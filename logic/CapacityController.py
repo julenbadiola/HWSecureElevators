@@ -1,7 +1,6 @@
 import cv2
 import imutils
 import numpy as np
-import argparse
 from logic.Singleton import SingletonMeta
 
 width = 800
