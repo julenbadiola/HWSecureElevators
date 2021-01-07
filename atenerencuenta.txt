@@ -9,3 +9,5 @@ https://realpython.com/python-speech-recognition/
 
 https://data-flair.training/blogs/python-project-real-time-human-detection-counting/
 https://github.com/LukashenkoEvgeniy/People-Counter/blob/master/PeopleCounterMain.py
+
+git stash save --keep-index --include-untracked

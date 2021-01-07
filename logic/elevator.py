@@ -26,6 +26,8 @@ class Elevator(metaclass=SingletonMeta):
 
     #Functionality
     calls_pool = []
+    arrived_pool = []
+    
     main_thread = None
     calls_thread = None
     ride_thread = None
@@ -59,7 +61,7 @@ class Elevator(metaclass=SingletonMeta):
         except Exception as e:
             print("ELEV: Could not set configuration. The configuration does not exist or is corrupt.")
             return False 
-            
+
     @property
     def overall_status(self):
         return self.status and self.voice_assistant.status and self.main_thread.is_alive()
@@ -134,12 +136,21 @@ class Elevator(metaclass=SingletonMeta):
     def ride(self, destination, floor):
         self.ride_thread = self.thread_ride(destination, floor)
 
+    def add_pool_arrived_lora(self, floor):
+        if floor not in self.arrived_pool:
+            self.arrived_pool.append(floor)
+
     def send_arrived_lora(self, floor):
-        data = {
-            prot.ELEVATOR_RIDE: floor,
-        }
-        encoded_data = prot.dump_data(data)
-        self.lora.write_string(encoded_data)
+        try:
+            for floorArrived in self.arrived_pool:
+                encoded_data = prot.dump_data({
+                    prot.ELEVATOR_ARRIVED: floor,
+                })
+                self.lora.write_string(encoded_data)
+            return True
+        except Exception as e:
+            print())
+            return False
 
     @threaded
     def thread_ride(self, destination, floorToGo):
@@ -174,7 +185,7 @@ class Elevator(metaclass=SingletonMeta):
         
         print(f"ELEV: Ride to {floorToGo} finished.")
         try:
-            self.send_arrived_lora(floorToGo)
+            self.add_pool_arrived_lora(floorToGo)
             self.calls_pool.remove(floorToGo)
         except Exception as e:
             #Si tira error es porque no es un call, el ride se ha activado desde el recog o los botones
