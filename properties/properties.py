@@ -29,10 +29,16 @@ class PropertiesManager(metaclass=SingletonMeta):
     
     #ELEVATOR PROPERTIES
     @property
-    def elevator_code(self):
+    def ELEVATOR_CODE(self):
         config = configparser.RawConfigParser()
         config.read(self.HARDWARE_CONFIGURATION_FILE)
         return str(config.get('MAIN', 'CODE'))
+
+    @property
+    def REFRESH_TIME(self):
+        config = configparser.RawConfigParser()
+        config.read(self.HARDWARE_CONFIGURATION_FILE)
+        return str(config.get('MAIN', 'REFRESH_TIME'))
 
     def get_elevator_configuration(self):
         config = configparser.RawConfigParser()

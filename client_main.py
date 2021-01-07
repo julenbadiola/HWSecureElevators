@@ -9,7 +9,7 @@ lora_endpoint = LoraEndpoint()
 
 def call_elevator(floor):
     data = {
-        prot.ELEVATOR_CALL: 50,
+        prot.ELEVATOR_CALL: floor,
     }
     encoded_data = prot.dump_data(data)
     lora_endpoint.write_string(encoded_data)

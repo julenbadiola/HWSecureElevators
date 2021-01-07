@@ -10,7 +10,7 @@ from lora.lora import LoraEndpoint
 from func import protocol as prot
 
 properties = PropertiesManager()
-elevator = Elevator(properties.elevator_code)
+elevator = Elevator(properties.ELEVATOR_CODE)
 lora = LoraEndpoint()
 
 """
@@ -36,19 +36,18 @@ def thread_checkLoraMessages():
         try:
             print("Waiting to receive a message...")
             encoded_data = lora.read()
-            print(f"Encoded data received: {encoded_data}")
             decoded_data = prot.decode_data(encoded_data)
             loaded_data = prot.load_data(decoded_data)
-            print(f"Loaded data: {loaded_data}")
             
             if prot.ELEVATOR_CALL in decoded_data:
                 print("Received elevator call")
                 calledFloor = int(decoded_data[prot.ELEVATOR_CALL])
                 elevator.call(calledFloor)
-        except:
-            raise
+        
+        except Exception as e:
+            print(f"EXCEPTION IN LORA {str(e)}")
 
-        sleep(3)
+        sleep(properties.REFRESH_TIME)
 
 if __name__ == "__main__":
     print("==================== SERVER SECURE ELEVATORS ===================== \n")
