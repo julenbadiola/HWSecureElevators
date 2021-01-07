@@ -2,14 +2,14 @@ import json
 
 from properties.properties import PropertiesManager
 from time import sleep
+import asyncio
 
 from logic.Singleton import SingletonMeta
 from logic.CapacityController import get_current_occupation, is_capacity_respected
 from logic.VoiceAssistant import VoiceAssistant
 from logic.VoiceRecognition import wait_voice_input, check_floor_and_ride
 from logic.threading import threaded
-from time import sleep
-import asyncio
+from func import protocol as prot
 
 class Elevator(metaclass=SingletonMeta):
     #Static
@@ -31,6 +31,35 @@ class Elevator(metaclass=SingletonMeta):
     ride_thread = None
     voice_recog_thread = None
 
+    #INITIALIZATION
+    def __init__(self, properties, lora):
+        self.voice_assistant = VoiceAssistant(self)
+        self.code = properties.ELEVATOR_CODE
+        self.lora = lora
+
+        print(f"ELEV: Initializing elevator {self.code}")
+        #Get configuration from backend or file
+        if self.activate():
+            self.status = True
+            print("ELEV: Status = successful.")
+        else:
+            self.status = False
+            print("ELEV: Status = error.")   
+        
+        self.main_thread = self.check_threads()
+        self.calls_thread = self.thread_check_calls()
+    
+    def activate(self):
+        config = PropertiesManager().get_elevator_configuration()
+        try:
+            self.functionalities = json.loads(config['DEFAULT']['FUNCTIONALITIES'])
+            self.floors = json.loads(config['DEFAULT']['FLOORS'])
+            self.capacity = int(config['DEFAULT']['CAPACITY'])
+            return True
+        except Exception as e:
+            print("ELEV: Could not set configuration. The configuration does not exist or is corrupt.")
+            return False 
+            
     @property
     def overall_status(self):
         return self.status and self.voice_assistant.status and self.main_thread.is_alive()
@@ -105,6 +134,13 @@ class Elevator(metaclass=SingletonMeta):
     def ride(self, destination, floor):
         self.ride_thread = self.thread_ride(destination, floor)
 
+    def send_arrived_lora(self, floor):
+        data = {
+            prot.ELEVATOR_RIDE: floor,
+        }
+        encoded_data = prot.dump_data(data)
+        self.lora.write_string(encoded_data)
+
     @threaded
     def thread_ride(self, destination, floorToGo):
         if (floorToGo == None):
@@ -138,6 +174,7 @@ class Elevator(metaclass=SingletonMeta):
         
         print(f"ELEV: Ride to {floorToGo} finished.")
         try:
+            self.send_arrived_lora(floorToGo)
             self.calls_pool.remove(floorToGo)
         except Exception as e:
             #Si tira error es porque no es un call, el ride se ha activado desde el recog o los botones
@@ -168,31 +205,6 @@ class Elevator(metaclass=SingletonMeta):
         sleep(2)
         self.doors_open = False
 
-    #INITIALIZATION
-    def __init__(self, code):
-        self.voice_assistant = VoiceAssistant(self)
-        self.code = code
-        print(f"ELEV: Initializing elevator {self.code}")
-        #Get configuration from backend or file
-        if self.activate():
-            self.status = True
-            print("ELEV: Status = successful.")
-        else:
-            self.status = False
-            print("ELEV: Status = error.")   
-        
-        self.main_thread = self.check_threads()
-        self.calls_thread = self.thread_check_calls()
     
-    def activate(self):
-        config = PropertiesManager().get_elevator_configuration()
-        try:
-            self.functionalities = json.loads(config['DEFAULT']['FUNCTIONALITIES'])
-            self.floors = json.loads(config['DEFAULT']['FLOORS'])
-            self.capacity = int(config['DEFAULT']['CAPACITY'])
-            return True
-        except Exception as e:
-            print("ELEV: Could not set configuration. The configuration does not exist or is corrupt.")
-            return False 
         
         

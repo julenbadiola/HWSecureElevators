@@ -3,7 +3,7 @@ import requests
 import configparser
 from logic.Singleton import SingletonMeta
 from func.servercommunication import get_from_backend, post_to_backend
-import functools
+from cached_property import cached_property
 
 class PropertiesManager(metaclass=SingletonMeta):
     MAIN_CONFIGURATION_FILE = "properties/main.properties"
@@ -15,33 +15,33 @@ class PropertiesManager(metaclass=SingletonMeta):
         self.elevatorConfig = configparser.RawConfigParser()
 
     #SERVER PROPERTIES
-    @functools.cached_property
+    @cached_property
     def BACKEND_URL(self):
         return str(self.config.get('SERVER', 'SERVER_URL'))
     
     #SPEECH PROPERTIES
-    @functools.cached_property
+    @cached_property
     def NUMBER_OF_TRIES_SPEECH(self):
         return int(self.config.get('SPEECH', 'NUMBER_OF_TRIES'))
     
-    @functools.cached_property
+    @cached_property
     def SPEECH_KEYWORD(self):
         return str(self.config.get('SPEECH', 'KEYWORD'))
     
-    @functools.cached_property
+    @cached_property
     def SPEECH_LANGUAGE(self):
         return int(self.config.get('SPEECH', 'LANGUAGE'))
     
-    @functools.cached_property
+    @cached_property
     def MIC_INDEX(self):
         return int(self.config.get('SPEECH', 'MIC_INDEX'))
     
     #ELEVATOR PROPERTIES
-    @functools.cached_property
+    @cached_property
     def ELEVATOR_CODE(self):
         return str(self.config.get('MAIN', 'CODE'))
 
-    @functools.cached_property
+    @cached_property
     def REFRESH_TIME(self):
         return int(self.config.get('MAIN', 'REFRESH_TIME'))
 

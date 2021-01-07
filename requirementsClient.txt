@@ -4,3 +4,4 @@ seeed-python-dht==0.0.2
 urllib3==1.25.7
 python-dotenv==0.10.3
 datetime
+cached-property
