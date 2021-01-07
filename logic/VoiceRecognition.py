@@ -2,16 +2,9 @@ import speech_recognition as sr
 from func.numparser import Text2Int
 from logic.VoiceAssistant import VoiceAssistant
 import asyncio
+from properties.properties import PropertiesManager as PM
 
 r = sr.Recognizer()
-NUM_TRIES = 3
-keyWord = 'piso'
-"""
-Quiero ir al piso 1
-Me gustaría ir al piso 1
-Llévame al piso 1
-Piso 1
-"""
 
 async def wait_for_confirmation(reason):
     va = VoiceAssistant()
@@ -36,7 +29,7 @@ def tries_advice(tries_left):
     elif tries_left == 1:
         tosay += f"Queda un intento"
     else:
-        tosay = f"No he entendido por {NUM_TRIES} veces. Utilice los botones físicos"
+        tosay = f"No he entendido por {PM().NUMBER_OF_TRIES_SPEECH} veces. Utilice los botones físicos"
     return tosay
 
 def cleanTextForNumbers(text):
@@ -68,14 +61,14 @@ async def check_floor_and_ride(text):
 async def wait_voice_input(_callback = None):
     va = VoiceAssistant()
     with sr.Microphone() as source:
-        tries_left = NUM_TRIES
+        tries_left = PM().NUMBER_OF_TRIES_SPEECH
         while tries_left > 0: 
             try:
                 audio = r.listen(source)
                 text = r.recognize_google(audio, language="es-ES")
                 print(text.lower())
                 
-                if keyWord.lower() in text.lower():
+                if PM().SPEECH_KEYWORD.lower() in text.lower():
                     if _callback:
                         if await _callback(text):
                             break

@@ -11,41 +11,31 @@ from func import protocol as prot
 
 properties = PropertiesManager()
 elevator = Elevator(properties.ELEVATOR_CODE)
-#lora = LoraEndpoint()
+lora_sender = LoraEndpoint()
+lora_listener = LoraEndpoint()
 
-"""
-@threaded
-def thread_initialization():
-    elevator.call(0)
-    while elevator.overall_status:
-        try:
-            if not elevator.riding:
-                print('Llamas desde el piso:')
-                x = input()
-                if not elevator.riding:
-                    elevator.call(int(x))
-        except:
-            raise
-
-        sleep(3)
-"""
+def ride_elevator(floor):
+    data = {
+        prot.ELEVATOR_RIDE: floor,
+    }
+    encoded_data = prot.dump_data(data)
+    lora_sender.write_string(encoded_data)
 
 @threaded
-def thread_checkLoraMessages():
+def thread_listen_to_floors():
     while elevator.overall_status:
         try:
-            print("Waiting to receive a message...")
-            encoded_data = lora.read()
-            decoded_data = prot.decode_data(encoded_data)
-            loaded_data = prot.load_data(decoded_data)
+            print("CABIN: Waiting to receive a message...")
+            data = prot.clean_data(lora_listener.read())
             
-            if prot.ELEVATOR_CALL in loaded_data:
+            if prot.ELEVATOR_CALL in data:
                 print("Received elevator call")
-                calledFloor = int(loaded_data[prot.ELEVATOR_CALL])
+                calledFloor = int(data[prot.ELEVATOR_CALL])
                 elevator.call(calledFloor)
+            ride_elevator(2)
         
         except Exception as e:
-            print(f"EXCEPTION IN LORA {str(e)}")
+            print(f"EXCEPTION IN thread_listen_to_floors {str(e)}")
 
         sleep(properties.REFRESH_TIME)
 
@@ -54,7 +44,7 @@ if __name__ == "__main__":
     #Initializing
     
     elevator.call(0)
-    #thread_checkLoraMessages()
+    thread_listen_to_floors()
     CapacityController()
     
 
