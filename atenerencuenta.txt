@@ -5,3 +5,7 @@ console=serial0,115200 console=tty1 root=PARTUUID=7ef8d9b5-02 rootfstype=ext4 el
 
 https://maker.pro/raspberry-pi/projects/speech-recognition-using-google-speech-api-and-python
 https://realpython.com/python-speech-recognition/
+
+
+https://data-flair.training/blogs/python-project-real-time-human-detection-counting/
+https://github.com/LukashenkoEvgeniy/People-Counter/blob/master/PeopleCounterMain.py

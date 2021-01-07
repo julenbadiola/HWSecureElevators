@@ -103,38 +103,35 @@ class Elevator(metaclass=SingletonMeta):
         self.ride_thread = self.thread_ride(destination, floor)
 
     @threaded
-    def thread_ride(self, destination, floor):
-        if (floor == None):
+    def thread_ride(self, destination, floorToGo):
+        if (floorToGo == None):
             return
-
-        indexFrom = self.floors.index(self.where)
-        indexTo = self.floors.index(floor)
         
-        if not self.valid_floor_selection(False, floor):
-            print(f"ELEV: The floor {floor} is disabled.")
+        if not self.valid_floor_selection(False, floorToGo):
+            print(f"ELEV: The floor {floorToGo} is disabled.")
 
-        elif(indexFrom == indexTo):
-            print(f"ELEV: Elevator already on floor {floor}.")
+        elif(self.where == floorToGo):
+            print(f"ELEV: Elevator already on floor {floorToGo}.")
 
         else:
-            diff = abs(indexFrom - indexTo)
+            diff = abs(self.where - floorToGo)
             self.close_doors()
-            self.voice_assistant.add_to_pool(f"Elevador yendo a {floor}.")
+            self.voice_assistant.add_to_pool(f"Elevador yendo a {floorToGo}.")
             for i in range(0, diff):
                 sleep(2)
-                #self.voice_assistant.add_to_pool(f"Elevador yendo a {floor}. Ahora en {i}")
-                print(f"ELEV: Riding to {floor}. Now in {i}")
+                #self.voice_assistant.add_to_pool(f"Elevador yendo a {floorToGo}. Ahora en {i}")
+                print(f"ELEV: Riding to {floorToGo}. Now in {i}")
 
-            self.where = floor
+            self.where = floorToGo
             self.open_doors()
             
             if not destination:
                 self.ask_for_floor_input()
             
         
-        print(f"ELEV: Ride to {floor} finished.")
+        print(f"ELEV: Ride to {floorToGo} finished.")
         try:
-            self.calls_pool.remove(floor)
+            self.calls_pool.remove(floorToGo)
         except Exception as e:
             #Si tira error es porque no es un call, el ride se ha activado desde el recog o los botones
             pass

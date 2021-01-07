@@ -5,16 +5,34 @@ from logic.Elevator import Elevator
 from properties.properties import PropertiesManager
 from lora.lora import LoraEndpoint
 
-if __name__ == "__main__":
-    print("==================== SERVER SECURE ELEVATORS ===================== \n")
-    #Initializing
-    #lora = LoraEndpoint()
-    
-    properties = PropertiesManager()
-    elevator = Elevator(properties.elevator_code)    
-    elevator.call(0)
+from logic.Capacity.CapacityController import initialize as InitCapacityController
+from logic.threading import threaded
+"""
+self.
+self.capacity_controller.detect()
+"""
 
-    sleep(0.5)
+properties = PropertiesManager()
+elevator = Elevator(properties.elevator_code)
+#lora = LoraEndpoint()
+
+@threaded
+def initialization():
+    elevator.call(0)
+    while elevator.overall_status:
+        try:
+            if not elevator.riding:
+                print('Llamas desde el piso:')
+                x = input()
+                if not elevator.riding:
+                    elevator.call(int(x))
+        except:
+            raise
+
+        sleep(3)
+
+@threaded
+def checkLoraMessages():
     while elevator.overall_status:
         try:
             #print("Waiting to receive a message...")
@@ -24,16 +42,19 @@ if __name__ == "__main__":
                 decoded_data = decode_data(encoded_data)
                 print(f"Decoded data: {decoded_data}")
             """
-            if not elevator.riding:
-                print('Llamas desde el piso:')
-                x = input()
-                if not elevator.riding:
-                    elevator.call(int(x))
                 
         except:
             raise
 
         sleep(3)
+
+if __name__ == "__main__":
+    print("==================== SERVER SECURE ELEVATORS ===================== \n")
+    #Initializing
+    
+    initialization()
+    InitCapacityController()
+    
 
 def decode_data(data: bytes) -> str:
     return data.decode()

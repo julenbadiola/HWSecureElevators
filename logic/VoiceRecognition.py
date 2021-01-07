@@ -49,6 +49,7 @@ def cleanTextForNumbers(text):
     return res
 
 async def check_floor_and_ride(text):
+    print(f"Recognizing {text}")
     elevator = VoiceAssistant().elevator
     floors = cleanTextForNumbers(text)
     if len(floors) == 1:
@@ -56,10 +57,12 @@ async def check_floor_and_ride(text):
         floor = floors[0]
         
         if elevator.valid_floor_selection(True, floor):
-            confirmation = await wait_for_confirmation(f"ir al piso {floor}")
+            """confirmation = await wait_for_confirmation(f"ir al piso {floor}")
             if confirmation:
                 elevator.ride(True, floor)
-                return True
+                return True"""
+            elevator.ride(True, floor)
+            return True
     return False
 
 async def wait_voice_input(_callback = None):
@@ -67,19 +70,20 @@ async def wait_voice_input(_callback = None):
     with sr.Microphone() as source:
         tries_left = NUM_TRIES
         while tries_left > 0: 
-            audio = r.listen(source)
             try:
+                audio = r.listen(source)
                 text = r.recognize_google(audio, language="es-ES")
-                #print(text.lower())
+                print(text.lower())
                 
                 if keyWord.lower() in text.lower():
                     if _callback:
-                        if await callback(text):
+                        if await _callback(text):
                             break
                         else:
                             tries_left -= 1
 
             except Exception as e:
+                print(e)
                 tries_left -= 1
 
             va.add_to_pool(tries_advice(tries_left))
