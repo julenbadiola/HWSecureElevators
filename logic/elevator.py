@@ -140,13 +140,14 @@ class Elevator(metaclass=SingletonMeta):
         if floor not in self.arrived_pool:
             self.arrived_pool.append(floor)
 
-    def send_arrived_lora(self, floor):
+    def send_arrived_lora(self):
         try:
             for floorArrived in self.arrived_pool:
                 encoded_data = prot.dump_data({
-                    prot.ELEVATOR_ARRIVED: floor,
+                    prot.ELEVATOR_ARRIVED: floorArrived,
                 })
                 self.lora.write_string(encoded_data)
+            self.arrived_pool.clear()
             return True
         except Exception as e:
             print(str(e))

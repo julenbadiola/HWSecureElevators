@@ -15,5 +15,5 @@ def load_data(data: str) -> Dict:
     return json.loads(data)
     
 def clean_data(lora_data: bytes) -> Dict:
-    decoded_data = prot.decode_data(lora_data)
-    return prot.load_data(decoded_data)
+    decoded_data = decode_data(lora_data)
+    return load_data(decoded_data)

@@ -7,7 +7,7 @@ from logic.Elevator import Elevator
 from logic.CapacityController import initialize as initialize_capacity_controller
 
 from lora.lora import LoraEndpoint
-from func.protocol import ELEVATOR_CALL, ELEVATOR_ARRIVED, clean_data
+from func import protocol
 
 properties = PropertiesManager()
 lora = LoraEndpoint()
@@ -18,11 +18,11 @@ def thread_listen_to_floors():
     while elevator.overall_status:
         try:
             print("CABIN: Waiting to receive a message...")
-            data = clean_data(lora.read())
+            data = protocol.clean_data(lora.read())
             
-            if ELEVATOR_CALL in data:
+            if protocol.ELEVATOR_CALL in data:
                 print("Received elevator call")
-                calledFloor = int(data[ELEVATOR_CALL])
+                calledFloor = int(data[protocol.ELEVATOR_CALL])
                 elevator.call(calledFloor)
             elevator.send_arrived_lora()
         
