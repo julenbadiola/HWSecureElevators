@@ -11,7 +11,7 @@ from func import protocol as prot
 
 properties = PropertiesManager()
 elevator = Elevator(properties.ELEVATOR_CODE)
-lora = LoraEndpoint()
+#lora = LoraEndpoint()
 
 """
 @threaded
@@ -39,9 +39,9 @@ def thread_checkLoraMessages():
             decoded_data = prot.decode_data(encoded_data)
             loaded_data = prot.load_data(decoded_data)
             
-            if prot.ELEVATOR_CALL in decoded_data:
+            if prot.ELEVATOR_CALL in loaded_data:
                 print("Received elevator call")
-                calledFloor = int(decoded_data[prot.ELEVATOR_CALL])
+                calledFloor = int(loaded_data[prot.ELEVATOR_CALL])
                 elevator.call(calledFloor)
         
         except Exception as e:
@@ -54,7 +54,7 @@ if __name__ == "__main__":
     #Initializing
     
     elevator.call(0)
-    thread_checkLoraMessages()
+    #thread_checkLoraMessages()
     CapacityController()
     
 

@@ -4,47 +4,33 @@ import configparser
 from logic.Singleton import SingletonMeta
 from func.servercommunication import get_from_backend, post_to_backend
 
-class PropertiesManager(metaclass=SingletonMeta):
-    MAIN_CONFIGURATION_FILE = "main.properties"
-    SERVER_CONFIGURATION_FILE = None
-    HARDWARE_CONFIGURATION_FILE = None
-    ELEVATOR_CONFIGURATION_FILE = None
+config = configparser.RawConfigParser()
 
-    #INITIALIZATION
-    def __init__(self):
-        config = configparser.RawConfigParser()
-        config.read("properties/"+self.MAIN_CONFIGURATION_FILE)
-        
-        path = str(config.get('SETTINGS', 'PROPERTIES_PATH'))
-        self.SERVER_CONFIGURATION_FILE = str(path + config.get('SETTINGS', 'SERVER_CONFIGURATION_FILE'))
-        self.HARDWARE_CONFIGURATION_FILE = str(path + config.get('SETTINGS', 'HARDWARE_CONFIGURATION_FILE'))
-        self.ELEVATOR_CONFIGURATION_FILE = str(path + config.get('SETTINGS', 'ELEVATOR_CONFIGURATION_FILE'))
-    
+class PropertiesManager(metaclass=SingletonMeta):
+    MAIN_CONFIGURATION_FILE = "properties/main.properties"
+    ELEVATOR_CONFIGURATION_FILE = "properties/elevator.properties"
+
     #BACKEND PROPERTIES
     @property   
-    def backend_url(self):
-        config = configparser.RawConfigParser()
-        config.read(self.SERVER_CONFIGURATION_FILE)
+    def BACKEND_URL(self):
+        config.read(self.MAIN_CONFIGURATION_FILE)
         return config.get('SERVER', 'SERVER_URL')
     
     #ELEVATOR PROPERTIES
     @property
     def ELEVATOR_CODE(self):
-        config = configparser.RawConfigParser()
-        config.read(self.HARDWARE_CONFIGURATION_FILE)
+        config.read(self.MAIN_CONFIGURATION_FILE)
         return str(config.get('MAIN', 'CODE'))
 
     @property
     def REFRESH_TIME(self):
-        config = configparser.RawConfigParser()
-        config.read(self.HARDWARE_CONFIGURATION_FILE)
-        return str(config.get('MAIN', 'REFRESH_TIME'))
+        config.read(self.MAIN_CONFIGURATION_FILE)
+        return int(config.get('MAIN', 'REFRESH_TIME'))
 
     def get_elevator_configuration(self):
-        config = configparser.RawConfigParser()
         config.read(self.ELEVATOR_CONFIGURATION_FILE)
         try:
-            data = get_from_backend(self.backend_url + self.elevator_code)
+            data = get_from_backend(self.BACKEND_URL + self.ELEVATOR_CODE)
             if data:
                 config['DEFAULT']['FUNCTIONALITIES'] = json.dumps(data['activeFunctionalities'])
                 config['DEFAULT']['FLOORS'] = json.dumps(data['activeFloors'])
@@ -54,7 +40,6 @@ class PropertiesManager(metaclass=SingletonMeta):
         except Exception as e:
             print(f"PROPERT: Error while trying to get configuration from backend:" + str(e))
             return config
-            
     
     #GENERIC
     def write_config_file(self, file, config):
