@@ -1,23 +1,19 @@
 import json
 from time import sleep
 
-from logic.Elevator import Elevator
 from properties.properties import PropertiesManager
-from lora.lora import LoraEndpoint
+from logic.Elevator import Elevator
+from logic.CapacityController import CapacityController
 
-from logic.Capacity.CapacityController import initialize as InitCapacityController
+from lora.lora import LoraEndpoint
 from logic.threading import threaded
-"""
-self.
-self.capacity_controller.detect()
-"""
 
 properties = PropertiesManager()
 elevator = Elevator(properties.elevator_code)
 #lora = LoraEndpoint()
 
 @threaded
-def initialization():
+def thread_initialization():
     elevator.call(0)
     while elevator.overall_status:
         try:
@@ -32,7 +28,7 @@ def initialization():
         sleep(3)
 
 @threaded
-def checkLoraMessages():
+def thread_checkLoraMessages():
     while elevator.overall_status:
         try:
             #print("Waiting to receive a message...")
@@ -52,8 +48,9 @@ if __name__ == "__main__":
     print("==================== SERVER SECURE ELEVATORS ===================== \n")
     #Initializing
     
-    initialization()
-    InitCapacityController()
+    thread_initialization()
+    #thread_checkLoraMessages()
+    CapacityController()
     
 
 def decode_data(data: bytes) -> str:

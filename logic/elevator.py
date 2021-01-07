@@ -4,6 +4,7 @@ from properties.properties import PropertiesManager
 from time import sleep
 
 from logic.Singleton import SingletonMeta
+from logic.CapacityController import get_current_occupation, is_capacity_respected
 from logic.VoiceAssistant import VoiceAssistant
 from logic.VoiceRecognition import wait_voice_input, check_floor_and_ride
 from logic.threading import threaded
@@ -73,6 +74,8 @@ class Elevator(metaclass=SingletonMeta):
                 self.calls_pool.append(where)
             except Exception as e:
                 self.status = False
+        else:
+            print(f"ELEV: Elevator called in inactive floor {where}")
 
     def kill_thread(self, thread):
         if thread:
@@ -107,13 +110,17 @@ class Elevator(metaclass=SingletonMeta):
         if (floorToGo == None):
             return
         
-        if not self.valid_floor_selection(False, floorToGo):
+        if not is_capacity_respected(self.capacity):
+            print(f"ELEV: The capacity is superior to maximum {self.capacity}.")
+
+        elif not self.valid_floor_selection(False, floorToGo):
             print(f"ELEV: The floor {floorToGo} is disabled.")
 
         elif(self.where == floorToGo):
             print(f"ELEV: Elevator already on floor {floorToGo}.")
-
+        
         else:
+            print(f"ELEV: Capacity and floor validations succeeded.")
             diff = abs(self.where - floorToGo)
             self.close_doors()
             self.voice_assistant.add_to_pool(f"Elevador yendo a {floorToGo}.")
