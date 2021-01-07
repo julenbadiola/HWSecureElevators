@@ -12,3 +12,4 @@ SpeechRecognition
 datetime
 imutils
 opencv-python
+pyserial

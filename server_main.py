@@ -1,17 +1,19 @@
 import json
 from time import sleep
+from logic.threading import threaded
 
 from properties.properties import PropertiesManager
 from logic.Elevator import Elevator
 from logic.CapacityController import CapacityController
 
 from lora.lora import LoraEndpoint
-from logic.threading import threaded
+from func import protocol as prot
 
 properties = PropertiesManager()
 elevator = Elevator(properties.elevator_code)
-#lora = LoraEndpoint()
+lora = LoraEndpoint()
 
+"""
 @threaded
 def thread_initialization():
     elevator.call(0)
@@ -26,19 +28,21 @@ def thread_initialization():
             raise
 
         sleep(3)
+"""
 
 @threaded
 def thread_checkLoraMessages():
     while elevator.overall_status:
         try:
-            #print("Waiting to receive a message...")
-            """
-                encoded_data = lora.read()
-                print(f"Encoded data received: {encoded_data}")
-                decoded_data = decode_data(encoded_data)
-                print(f"Decoded data: {decoded_data}")
-            """
-                
+            print("Waiting to receive a message...")
+            encoded_data = lora.read()
+            print(f"Encoded data received: {encoded_data}")
+            decoded_data = decode_data(encoded_data)
+            print(f"Decoded data: {decoded_data}")
+            
+            if prot.ELEVATOR_CALL in decoded_data:
+                print("Received elevator call")
+                elevator.call(decoded_data[prot.ELEVATOR_CALL])
         except:
             raise
 
@@ -48,8 +52,8 @@ if __name__ == "__main__":
     print("==================== SERVER SECURE ELEVATORS ===================== \n")
     #Initializing
     
-    thread_initialization()
-    #thread_checkLoraMessages()
+    elevator.call(0)
+    thread_checkLoraMessages()
     CapacityController()
     
 
