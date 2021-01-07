@@ -37,12 +37,14 @@ def thread_checkLoraMessages():
             print("Waiting to receive a message...")
             encoded_data = lora.read()
             print(f"Encoded data received: {encoded_data}")
-            decoded_data = decode_data(encoded_data)
-            print(f"Decoded data: {decoded_data}")
+            decoded_data = prot.decode_data(encoded_data)
+            loaded_data = prot.load_data(decoded_data)
+            print(f"Loaded data: {loaded_data}")
             
             if prot.ELEVATOR_CALL in decoded_data:
                 print("Received elevator call")
-                elevator.call(decoded_data[prot.ELEVATOR_CALL])
+                calledFloor = int(decoded_data[prot.ELEVATOR_CALL])
+                elevator.call(calledFloor)
         except:
             raise
 
@@ -57,6 +59,5 @@ if __name__ == "__main__":
     CapacityController()
     
 
-def decode_data(data: bytes) -> str:
-    return data.decode()
+
 
