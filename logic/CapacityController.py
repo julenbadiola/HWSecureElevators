@@ -17,8 +17,8 @@ def is_capacity_respected(maximumCapacity):
 
 
 def initialize():
-    camera = cv2.VideoCapture("logic/CapacityTestVideos/test2.mp4")
-    #camera = cv2.VideoCapture(0)
+    #camera = cv2.VideoCapture("logic/CapacityTestVideos/test2.mp4")
+    camera = cv2.VideoCapture(0)
     firstFrame = None
 
     # loop over the frames of the video

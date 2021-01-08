@@ -94,11 +94,11 @@ class Elevator(metaclass=SingletonMeta):
         self.voice_recog_thread = kill_thread(self.voice_recog_thread)
         self.physic_button_thread = kill_thread(self.physic_button_thread)
 
-    def wait_for_floor_input(self):
+    def wait_for_floor_input(self, speak):
         #Matamos los hilos input si existen
         self.kill_floor_input_threads()
         #Activamos el reconocimiento por voz
-        self.voice_recog_thread = self.thread_voice_recognition_floor_input()
+        self.voice_recog_thread = self.thread_voice_recognition_floor_input(speak)
         #Activamos los botones (emulados por teclado)
         self.physic_button_thread = self.thread_physic_button_floor_input()
 
@@ -109,14 +109,15 @@ class Elevator(metaclass=SingletonMeta):
         self.ride(True, int(x))
 
     @threaded
-    def thread_voice_recognition_floor_input(self):
+    def thread_voice_recognition_floor_input(self, speak):
         try:
-            self.voice_assistant.add_to_pool('Pronuncie el piso al que desea ir o utilice los botones físicos.')
+            if speak:
+                self.voice_assistant.add_to_pool('Speak the floor you want to go.')
             time.sleep(2)
             asyncio.run(wait_voice_input(check_floor_and_ride))
         except Exception as e:
             #ServerCommunication().send_incidence_data(EXCEPTION, str(e))
-            self.voice_assistant.add_to_pool("No se pudo inicializar el reconocimiento por voz.")
+            self.voice_assistant.add_to_pool("Voice recognition could not be initialized.")
         
     def ride(self, destination, floor):
         self.ride_thread = self.thread_ride(destination, floor)
@@ -131,6 +132,7 @@ class Elevator(metaclass=SingletonMeta):
         occupation = get_current_occupation()
         if self.capacity < occupation:
             print(f"ELEV: The capacity is higher than maximum {self.capacity}.")
+            self.voice_assistant.add_to_pool(f"The current occupation is higher than maximum of {self.capacity}.")
             ServerCommunication().send_incidence_data(CAPACITY_OVER, f"{occupation}/{self.capacity}")
 
         elif not self.valid_floor_selection(False, floorToGo):
@@ -144,18 +146,18 @@ class Elevator(metaclass=SingletonMeta):
             print(f"ELEV: Capacity and floor validations succeeded.")
             diff = abs(self.where - floorToGo)
             self.close_doors()
-            self.voice_assistant.add_to_pool(f"Elevador going to {floorToGo}.")
+            self.voice_assistant.add_to_pool(f"Elevator going to {floorToGo}.")
             for i in range(0, diff):
                 time.sleep(2)
-                #self.voice_assistant.add_to_pool(f"Elevador yendo a {floorToGo}. Ahora en {i}")
                 print(f"ELEV: Riding to {floorToGo}. Now in {i}")
 
             ServerCommunication().send_ride_data(self.where, floorToGo, time.time() - start, occupation)
             self.where = floorToGo
             self.open_doors()
-            if not destination:
-                #TODO if destination no decir nada, si no, decir a qué piso quieres ir?
-                self.wait_for_floor_input()
+
+            #If this floor is the destination, dont say: where do you want to go?
+            speak = not destination
+            self.wait_for_floor_input(speak)
             
         print(f"ELEV: Ride to {floorToGo} finished.")
         try:
@@ -174,19 +176,19 @@ class Elevator(metaclass=SingletonMeta):
             return True
         else:
             if voice:
-                self.voice_assistant.add_to_pool(f"El piso {floor} está inhabilitado.")
+                self.voice_assistant.add_to_pool(f"The floor {floor} is disabled")
             return False
 
     def add_to_voice_assistant(self, tosay):
         self.voice_assistant.add_to_pool(tosay)
 
     def open_doors(self):
-        self.voice_assistant.add_to_pool("Abriendo cabina.")
+        self.voice_assistant.add_to_pool("Opening cabin")
         time.sleep(2)
         self.doors_open = True
     
     def close_doors(self):
-        self.voice_assistant.add_to_pool("Cerrando cabina.")
+        self.voice_assistant.add_to_pool("Closing cabin")
         time.sleep(2)
         self.doors_open = False
 

@@ -27,7 +27,7 @@ def thread_listen_to_floors():
             elevator.send_arrived_lora()
         
         except Exception as e:
-            print(f"quitar EXCEPTION IN thread_listen_to_floors {str(e)}")
+            pass
 
 if __name__ == "__main__":
     print("==================== SERVER SECURE ELEVATORS ===================== \n")

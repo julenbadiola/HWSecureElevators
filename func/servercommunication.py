@@ -81,7 +81,7 @@ class ServerCommunication(metaclass=SingletonMeta):
         data = {
             "elevator":  self.PROPERTIES.ELEVATOR_ID,
             "from": int(fromFloor),
-            "toFloor": int(toFloor),
+            "to": int(toFloor),
             "time": int(time),
             "numPassengers": int(numPassengers)
         }

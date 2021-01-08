@@ -9,7 +9,7 @@ r = sr.Recognizer()
 async def wait_for_confirmation(reason):
     va = VoiceAssistant()
     va.add_to_pool(f'Esperando confirmación para {reason}')
-    with sr.Microphone() as source:
+    with sr.Microphone(device_index=2) as source:
         while True:
             audio = r.listen(source)
             try:
@@ -59,11 +59,9 @@ async def check_floor_and_ride(text):
     return False
 
 async def wait_voice_input(_callback = None):
-    va = VoiceAssistant()
     try:
-        with sr.Microphone() as source:
-            tries_left = PM().NUMBER_OF_TRIES_SPEECH
-            while tries_left > 0: 
+        with sr.Microphone(device_index=2) as source:
+            while True: 
                 try:
                     audio = r.listen(source)
                     text = r.recognize_google(audio, language="es-ES")
@@ -73,18 +71,13 @@ async def wait_voice_input(_callback = None):
                         if _callback:
                             if await _callback(text):
                                 break
-                            else:
-                                tries_left -= 1
 
                 except Exception as e:
                     print(e)
-                    tries_left -= 1
-
-                va.add_to_pool(tries_advice(tries_left))
 
             #print("VOICE RECOGNITION STOPPED")
             return
-        #print("VOICE RECOGNITION STOPPED")
+        print("VOICEREC: Stopped")
     except Exception:
         raise Exception("VOICEREC: Could not initialize")
     

@@ -17,6 +17,8 @@ def call_elevator(floor):
     }
     encoded_data = prot.dump_data(data)
     lora_endpoint.write_string(encoded_data)
+    #TODO: Enceder led parpadeante que significa que he llamado al ascensor
+
 
     #Listen to cabin por 10 seconds, if the elevator has not arrived, stop listening
     #This is because cannot call the elevator while listen_to_cabin is running, since lora module is busy
@@ -24,6 +26,7 @@ def call_elevator(floor):
     signal.alarm(10)
     try:
         listen_to_cabin()
+
     except Exception as e:
         print(f"listen_to_cabin {str(e)}")
 
@@ -35,6 +38,8 @@ def listen_to_cabin():
             data = prot.clean_data(lora_endpoint.read())
                 
             if prot.ELEVATOR_ARRIVE in data:
+                #TODO: Apagar LED
+                
                 arrived_to = int(data[prot.ELEVATOR_ARRIVE])
                 print(f"Received elevator arrived {arrived_to}")
                 break
@@ -47,8 +52,11 @@ if __name__ == "__main__":
     while True:
         try:
             #Emulador botón físico
+            #TODO: if sensor proximidad detecta algo o el boton es presionado => call_elevator
             print(f'Llamas desde el {THIS_FLOOR}:')
             x = input()
+
+
             call_elevator(THIS_FLOOR)
         except Exception as e:
             print(f"EXCEPTION IN thread_main {str(e)}")
