@@ -10,11 +10,12 @@ CAPACITY_OVER = "capacityover"
 
 class ServerCommunication(metaclass=SingletonMeta):
     PROPERTIES = None
+    main_thread = None
     pool = []
 
     def __init__(self, properties):
         self.PROPERTIES = properties
-        self.check_pool()
+        self.main_thread = self.thread_check_pool()
         print("BACKEND: Initialized")
 
     def add_to_pool(self, url, data):
@@ -24,29 +25,31 @@ class ServerCommunication(metaclass=SingletonMeta):
         }
         self.pool.append(obj)
     
+    @property
+    def status():
+        if self.main_thread and self.main_thread.is_alive():
+            return True
+        return False
+        
     @threaded
-    def check_pool(self):
+    def thread_check_pool(self):
         while True:
-            time.sleep(1)
+            time.sleep(10)
             for dataToSend in self.pool:
                 try:
-                    response = self.post_to_backend(dataToSend['url'], dataToSend['data'])
-                    if response.status_code == 200:
+                    r = self.post_to_backend(dataToSend['url'], dataToSend['data'])
+                    if r and r.status_code == 200:
+                        print(f"RESPONSE FOR {dataToSend['url']}: {r.json()}")
                         self.pool.remove(dataToSend)
-                        return True
-                    return False
                 except Exception as e:
                     print(str(e))
 
     def post_to_backend(self, path, data):
-        url = str(path)
         print(f"BACKEND: Posting {data} to backend")
-        r = requests.post(url, json=data)
         try:
-            response = r.json()
-            print(response)
-            print(response.status_code)
-            return response
+            url = str(path)
+            r = requests.post(url, json=data)
+            return r
         except Exception as e:
             print(f"BACKEND: Error while posting data to {path} = " + str(e))
             return None

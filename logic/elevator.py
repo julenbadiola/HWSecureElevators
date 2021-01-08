@@ -15,6 +15,7 @@ from func.servercommunication import ServerCommunication, DISABLED_FLOOR, CAPACI
 class Elevator(metaclass=SingletonMeta):
     #Static
     code = None
+    id = None
     config = None
     functionalities = []
     floors = []
@@ -36,41 +37,36 @@ class Elevator(metaclass=SingletonMeta):
 
     #INITIALIZATION
     def __init__(self, properties, lora):
-        self.voice_assistant = VoiceAssistant(self)
-        self.code = properties.ELEVATOR_CODE
-        self.lora = lora
-
         print(f"ELEV: Initializing elevator {self.code}")
         #Get configuration from backend or file
-        if self.activate():
-            self.status = True
-            print("ELEV: Status = successful.")
-        else:
-            self.status = False
-            print("ELEV: Status = error.")   
-        
-        self.calls_thread = self.thread_check_calls()
-    
-    def activate(self):
-        config = PropertiesManager().get_elevator_configuration()
+        config = properties.get_elevator_configuration()
         try:
+            self.id = json.loads(config['DEFAULT']['ID'])
             self.functionalities = json.loads(config['DEFAULT']['FUNCTIONALITIES'])
             self.floors = json.loads(config['DEFAULT']['FLOORS'])
             self.capacity = int(config['DEFAULT']['CAPACITY'])
-            return True
+
+            self.calls_thread = self.thread_check_calls()
+            self.voice_assistant = VoiceAssistant(self)
+            self.code = properties.ELEVATOR_CODE
+            self.lora = lora
+            print("ELEV: Initialized successfully")
+
         except Exception as e:
-            print("ELEV: Could not set configuration. The configuration does not exist or is corrupt.")
-            return False 
+            print(f"ELEV: Could not set configuration. The configuration does not exist or is corrupt. {str(e)}")
 
     @property
     def overall_status(self):
-        return self.status and self.voice_assistant.status
+        try:
+            return self.calls_thread.is_alive() and self.voice_assistant.status
+        except Exception:
+            return False
 
     @property
     def riding(self):
-        if self.ride_thread:
+        try:
             return self.ride_thread.is_alive()
-        else:
+        except Exception:
             return False
 
     @threaded
@@ -90,10 +86,7 @@ class Elevator(metaclass=SingletonMeta):
             print(f"ELEV: Elevator called in {where}")
             #self.voice_assistant.add_to_pool(f"Elevador llamado en el piso {where}")
             ServerCommunication().send_call_data(where)
-            try:
-                self.calls_pool.append(where)
-            except Exception as e:
-                self.status = False
+            self.calls_pool.append(where)
         else:
             print(f"ELEV: Elevator called in inactive floor {where}")
 
@@ -131,8 +124,8 @@ class Elevator(metaclass=SingletonMeta):
             return
         
         occupation = get_current_occupation()
-        if occupation <= self.capacity:
-            print(f"ELEV: The capacity is higher to maximum {self.capacity}.")
+        if self.capacity < occupation:
+            print(f"ELEV: The capacity is higher than maximum {self.capacity}.")
             ServerCommunication().send_incidence_data(self.where, CAPACITY_OVER, f"{occupation}/{self.capacity}")
 
         elif not self.valid_floor_selection(False, floorToGo):
