@@ -87,14 +87,11 @@ class ServerCommunication(metaclass=SingletonMeta):
         }
         self.add_to_pool(url, data)
 
-    def send_incidence_data(self, where, reason, moredata):
+    def send_incidence_data(self, reason, moredata=""):
         url =  self.PROPERTIES.POST_INCIDENCE_URL
         data = {
             "elevator":  self.PROPERTIES.ELEVATOR_ID,
-            "where": int(where),
-            "reason": str(reason)
+            "reason": str(reason),
+            "data": str(moredata)
         }
-        if moredata:
-            data["data"] = str(moredata),
-        
         self.add_to_pool(url, data)

@@ -17,7 +17,7 @@ elevator = Elevator(properties, lora)
 def thread_listen_to_floors():
     while elevator.overall_status:
         try:
-            print("CABIN: Waiting to receive a message...")
+            print("MAIN: Waiting to receive a LORA message...")
             data = protocol.clean_data(lora.read())
             
             if protocol.ELEVATOR_CALL in data:

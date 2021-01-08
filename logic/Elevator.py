@@ -115,7 +115,7 @@ class Elevator(metaclass=SingletonMeta):
             time.sleep(2)
             asyncio.run(wait_voice_input(check_floor_and_ride))
         except Exception as e:
-            #ServerCommunication().send_incidence_data(self.where, EXCEPTION, str(e))
+            #ServerCommunication().send_incidence_data(EXCEPTION, str(e))
             self.voice_assistant.add_to_pool("No se pudo inicializar el reconocimiento por voz.")
         
     def ride(self, destination, floor):
@@ -131,11 +131,11 @@ class Elevator(metaclass=SingletonMeta):
         occupation = get_current_occupation()
         if self.capacity < occupation:
             print(f"ELEV: The capacity is higher than maximum {self.capacity}.")
-            ServerCommunication().send_incidence_data(self.where, CAPACITY_OVER, f"{occupation}/{self.capacity}")
+            ServerCommunication().send_incidence_data(CAPACITY_OVER, f"{occupation}/{self.capacity}")
 
         elif not self.valid_floor_selection(False, floorToGo):
             print(f"ELEV: The floor {floorToGo} is disabled.")
-            ServerCommunication().send_incidence_data(self.where, DISABLED_FLOOR, None)
+            ServerCommunication().send_incidence_data(DISABLED_FLOOR, None)
 
         elif(self.where == floorToGo):
             print(f"ELEV: Elevator already on floor {floorToGo}.")
