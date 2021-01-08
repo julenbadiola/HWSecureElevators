@@ -35,9 +35,30 @@ class Thread_with_trace(threading.Thread):
         self.killed = True
 
 def threaded(fn):
+    #Custom threading annotation 
     def wrapper(*args, **kwargs):
         thread = Thread_with_trace(
             target=fn, args=args, kwargs=kwargs)
         thread.start()
         return thread
     return wrapper
+
+def kill_thread(thread):
+    #Kills the thread and returns None type
+    if thread and thread.is_alive():
+        thread.kill()
+        thread.join() 
+    return None
+
+def clean_thread(thread):
+    #Returns none if the thread is not alive
+    if thread and not thread.is_alive():
+        return None
+    else:
+        return t
+
+@threaded
+def timeout_thread(timeout, thread):
+    #Sleeps for timeout parameter seconds and kills thread
+    time.sleep(timeout)
+    return kill_thread(thread)

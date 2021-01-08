@@ -2,23 +2,37 @@ import json
 import requests 
 import configparser
 from logic.Singleton import SingletonMeta
-from func.servercommunication import get_from_backend, post_to_backend
+from func.servercommunication import ServerCommunication
 from cached_property import cached_property
 
 class PropertiesManager(metaclass=SingletonMeta):
     MAIN_CONFIGURATION_FILE = "properties/main.properties"
     ELEVATOR_CONFIGURATION_FILE = "properties/elevator.properties"
+    SERVER_COMMUNICATION = None
 
     def __init__(self):
         self.config = configparser.RawConfigParser()
         self.config.read(self.MAIN_CONFIGURATION_FILE)
         self.elevatorConfig = configparser.RawConfigParser()
+        self.SERVER_COMMUNICATION = ServerCommunication(self)
 
     #SERVER PROPERTIES
     @cached_property
     def BACKEND_URL(self):
         return str(self.config.get('SERVER', 'SERVER_URL'))
     
+    @cached_property
+    def POST_CALL_URL(self):
+        return self.BACKEND_URL + str(self.config.get('SERVER', 'CALL_PATH'))
+    
+    @cached_property
+    def POST_RIDE_URL(self):
+        return self.BACKEND_URL + str(self.config.get('SERVER', 'RIDE_PATH'))
+    
+    @cached_property
+    def POST_INCIDENCE_URL(self):
+        return self.BACKEND_URL + str(self.config.get('SERVER', 'INCIDENCE_PATH'))
+
     #SPEECH PROPERTIES
     @cached_property
     def NUMBER_OF_TRIES_SPEECH(self):
@@ -46,11 +60,16 @@ class PropertiesManager(metaclass=SingletonMeta):
         return int(self.config.get('MAIN', 'REFRESH_TIME'))
 
     #ELEVATOR SPECIFIC CONFIG (elevator.properties)
+    @cached_property
+    def ELEVATOR_ID(self):
+        return int(self.elevatorConfig.get('DEFAULT', 'ID'))
+
     def get_elevator_configuration(self):
         self.elevatorConfig.read(self.ELEVATOR_CONFIGURATION_FILE)
         try:
-            data = get_from_backend(self.BACKEND_URL + self.ELEVATOR_CODE)
+            data = self.SERVER_COMMUNICATION.get_from_backend(self.BACKEND_URL + self.ELEVATOR_CODE)
             if data:
+                self.elevatorConfig['DEFAULT']['ID'] = json.dumps(data['_id'])
                 self.elevatorConfig['DEFAULT']['FUNCTIONALITIES'] = json.dumps(data['activeFunctionalities'])
                 self.elevatorConfig['DEFAULT']['FLOORS'] = json.dumps(data['activeFloors'])
                 self.elevatorConfig['DEFAULT']['CAPACITY'] = str(data['capacity'])

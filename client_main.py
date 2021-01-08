@@ -1,5 +1,6 @@
 import os
 import time
+import signal
 from lora.lora import LoraEndpoint
 from func import protocol as prot
 from logic.threading import threaded
@@ -7,15 +8,27 @@ from logic.threading import threaded
 THIS_FLOOR = 1
 lora_endpoint = LoraEndpoint()
 
+def timeout_handler(signum, frame):
+    raise Exception("Timeout reached")
+
 def call_elevator(floor):
     data = {
         prot.ELEVATOR_CALL: floor,
     }
     encoded_data = prot.dump_data(data)
     lora_endpoint.write_string(encoded_data)
-    listen_to_cabin()
+
+    #Listen to cabin por 10 seconds, if the elevator has not arrived, stop listening
+    #This is because cannot call the elevator while listen_to_cabin is running, since lora module is busy
+    signal.signal(signal.SIGALRM, timeout_handler)
+    signal.alarm(10)
+    try:
+        listen_to_cabin()
+    except Exception as e:
+        print(f"listen_to_cabin {str(e)}")
 
 def listen_to_cabin():
+    #Listen to cabin ELEVATOR_ARRIVE events
     while True:
         try:
             print("FLOOR: Waiting to receive arrived message from elevator...")
@@ -33,6 +46,7 @@ def listen_to_cabin():
 def thread_main():
     while True:
         try:
+            #Emulador botón físico
             print(f'Llamas desde el {THIS_FLOOR}:')
             x = input()
             call_elevator(THIS_FLOOR)
@@ -43,6 +57,5 @@ def thread_main():
 
 if __name__ == "__main__":
     print("Lora [OK]")
-    #thread_listen_to_cabin()
     thread_main()
     
