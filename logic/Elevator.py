@@ -10,7 +10,7 @@ from logic.VoiceAssistant import VoiceAssistant
 from logic.VoiceRecognition import wait_voice_input, check_floor_and_ride
 from logic.threading import threaded, kill_thread
 from func import protocol as prot
-from func.servercommunication import ServerCommunication, DISABLED_FLOOR, CAPACITY_OVER
+from func.servercommunication import ServerCommunication, DISABLED_FLOOR, CAPACITY_OVER, EXCEPTION
 
 class Elevator(metaclass=SingletonMeta):
     #Static
@@ -37,7 +37,7 @@ class Elevator(metaclass=SingletonMeta):
 
     #INITIALIZATION
     def __init__(self, properties, lora):
-        print(f"ELEV: Initializing elevator {self.code}")
+        print(f"ELEV: Initializing elevator")
         #Get configuration from backend or file
         config = properties.get_elevator_configuration()
         try:
@@ -106,7 +106,7 @@ class Elevator(metaclass=SingletonMeta):
     def thread_physic_button_floor_input(self):
         print('VAS AL PISO:')
         x = input()
-        self.ride(True, floor)
+        self.ride(True, int(x))
 
     @threaded
     def thread_voice_recognition_floor_input(self):
@@ -114,12 +114,13 @@ class Elevator(metaclass=SingletonMeta):
             self.voice_assistant.add_to_pool('Pronuncie el piso al que desea ir o utilice los botones físicos.')
             time.sleep(2)
             asyncio.run(wait_voice_input(check_floor_and_ride))
-        except expression as identifier:
-            self.voice_assistant.add_to_pool('No se ha podido iniciar el reconocimiento de voz. Utilice los botones físicos.')
+        except Exception as e:
+            #ServerCommunication().send_incidence_data(self.where, EXCEPTION, str(e))
+            self.voice_assistant.add_to_pool("No se pudo inicializar el reconocimiento por voz.")
         
     def ride(self, destination, floor):
-        self.kill_floor_input_threads()
         self.ride_thread = self.thread_ride(destination, floor)
+        self.kill_floor_input_threads()
 
     @threaded
     def thread_ride(self, destination, floorToGo):
@@ -149,10 +150,11 @@ class Elevator(metaclass=SingletonMeta):
                 #self.voice_assistant.add_to_pool(f"Elevador yendo a {floorToGo}. Ahora en {i}")
                 print(f"ELEV: Riding to {floorToGo}. Now in {i}")
 
+            ServerCommunication().send_ride_data(self.where, floorToGo, time.time() - start, occupation)
             self.where = floorToGo
             self.open_doors()
-            ServerCommunication().send_ride_data(self.where, floorToGo, time.time() - start, occupation)
             if not destination:
+                #TODO if destination no decir nada, si no, decir a qué piso quieres ir?
                 self.wait_for_floor_input()
             
         print(f"ELEV: Ride to {floorToGo} finished.")

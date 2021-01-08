@@ -60,27 +60,31 @@ async def check_floor_and_ride(text):
 
 async def wait_voice_input(_callback = None):
     va = VoiceAssistant()
-    with sr.Microphone() as source:
-        tries_left = PM().NUMBER_OF_TRIES_SPEECH
-        while tries_left > 0: 
-            try:
-                audio = r.listen(source)
-                text = r.recognize_google(audio, language="es-ES")
-                print(text.lower())
-                
-                if PM().SPEECH_KEYWORD.lower() in text.lower():
-                    if _callback:
-                        if await _callback(text):
-                            break
-                        else:
-                            tries_left -= 1
+    try:
+        with sr.Microphone() as source:
+            tries_left = PM().NUMBER_OF_TRIES_SPEECH
+            while tries_left > 0: 
+                try:
+                    audio = r.listen(source)
+                    text = r.recognize_google(audio, language="es-ES")
+                    print(text.lower())
+                    
+                    if PM().SPEECH_KEYWORD.lower() in text.lower():
+                        if _callback:
+                            if await _callback(text):
+                                break
+                            else:
+                                tries_left -= 1
 
-            except Exception as e:
-                print(e)
-                tries_left -= 1
+                except Exception as e:
+                    print(e)
+                    tries_left -= 1
 
-            va.add_to_pool(tries_advice(tries_left))
+                va.add_to_pool(tries_advice(tries_left))
 
+            #print("VOICE RECOGNITION STOPPED")
+            return
         #print("VOICE RECOGNITION STOPPED")
-        return
-    #print("VOICE RECOGNITION STOPPED")
+    except Exception:
+        raise Exception("VOICEREC: Could not initialize")
+    

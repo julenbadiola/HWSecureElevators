@@ -30,5 +30,6 @@ class VoiceAssistant(metaclass=SingletonMeta):
             if len(self.pool) > 0:
                 tosay = self.pool[0]
                 if tosay:
-                    os.system(f'say {tosay}')
+                    print(f"VOICEASSIST: Saying {tosay}")
+                    os.system(f'pico2wave -w temp.wav "{tosay}" && aplay temp.wav')
                     del self.pool[0]

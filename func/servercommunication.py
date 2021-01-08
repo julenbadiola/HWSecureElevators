@@ -7,6 +7,7 @@ from logic.threading import threaded, kill_thread
 #Incidence event types
 DISABLED_FLOOR = "disabledfloor"
 CAPACITY_OVER = "capacityover"
+EXCEPTION = "exception"
 
 class ServerCommunication(metaclass=SingletonMeta):
     PROPERTIES = None
