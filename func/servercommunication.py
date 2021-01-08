@@ -30,7 +30,7 @@ class ServerCommunication(metaclass=SingletonMeta):
         if self.main_thread and self.main_thread.is_alive():
             return True
         return False
-        
+
     @threaded
     def thread_check_pool(self):
         while True:
@@ -39,7 +39,7 @@ class ServerCommunication(metaclass=SingletonMeta):
                 try:
                     r = self.post_to_backend(dataToSend['url'], dataToSend['data'])
                     if r and r.status_code == 200:
-                        print(f"RESPONSE FOR {dataToSend['url']}: {r.json()}")
+                        print(f"BACKEND: Response for {dataToSend['url']}: {r.json()}")
                         self.pool.remove(dataToSend)
                 except Exception as e:
                     print(str(e))

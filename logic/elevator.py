@@ -110,9 +110,13 @@ class Elevator(metaclass=SingletonMeta):
 
     @threaded
     def thread_voice_recognition_floor_input(self):
-        self.voice_assistant.add_to_pool('Pronuncie el piso al que desea ir o utilize los botones físicos.')
-        asyncio.run(wait_voice_input(check_floor_and_ride))
-
+        try:
+            self.voice_assistant.add_to_pool('Pronuncie el piso al que desea ir o utilice los botones físicos.')
+            time.sleep(2)
+            asyncio.run(wait_voice_input(check_floor_and_ride))
+        except expression as identifier:
+            self.voice_assistant.add_to_pool('No se ha podido iniciar el reconocimiento de voz. Utilice los botones físicos.')
+        
     def ride(self, destination, floor):
         self.kill_floor_input_threads()
         self.ride_thread = self.thread_ride(destination, floor)
@@ -193,7 +197,7 @@ class Elevator(metaclass=SingletonMeta):
         try:
             for floorArrived in self.arrived_pool:
                 encoded_data = prot.dump_data({
-                    prot.ELEVATOR_ARRIVED: floorArrived,
+                    prot.ELEVATOR_ARRIVE: floorArrived,
                 })
                 self.lora.write_string(encoded_data)
             self.arrived_pool.clear()

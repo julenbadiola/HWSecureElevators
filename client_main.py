@@ -9,7 +9,7 @@ THIS_FLOOR = 1
 lora_endpoint = LoraEndpoint()
 
 def timeout_handler(signum, frame):
-    raise Exception("Timeout reached")
+    raise Exception("timeout reached")
 
 def call_elevator(floor):
     data = {
@@ -41,9 +41,9 @@ def listen_to_cabin():
             
         except Exception as e:
             print(f"EXCEPTION IN Listen_to_cabin {str(e)}")
-    
-@threaded
-def thread_main():
+
+if __name__ == "__main__":
+    print("Lora [OK]")
     while True:
         try:
             #Emulador botón físico
@@ -54,8 +54,4 @@ def thread_main():
             print(f"EXCEPTION IN thread_main {str(e)}")
 
         time.sleep(3)
-
-if __name__ == "__main__":
-    print("Lora [OK]")
-    thread_main()
     
