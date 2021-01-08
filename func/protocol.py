@@ -3,6 +3,7 @@ from typing import Dict
 
 ELEVATOR_CALL = "elevatorcall"
 ELEVATOR_RIDE = "elevatorride"
+ELEVATOR_INCIDENCE = "elevatorincidence"
 ELEVATOR_ARRIVED = "elevatorarrived"
 
 def dump_data(data: Dict) -> str:

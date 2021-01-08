@@ -69,7 +69,7 @@ class Elevator(metaclass=SingletonMeta):
     @property
     def riding(self):
         if self.ride_thread:
-            return self.ride_thread.is_alive():
+            return self.ride_thread.is_alive()
         else:
             return False
 

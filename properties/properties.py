@@ -62,7 +62,7 @@ class PropertiesManager(metaclass=SingletonMeta):
     #ELEVATOR SPECIFIC CONFIG (elevator.properties)
     @cached_property
     def ELEVATOR_ID(self):
-        return int(self.elevatorConfig.get('DEFAULT', 'ID'))
+        return str(self.elevatorConfig.get('DEFAULT', 'ID')).replace('"', '')
 
     def get_elevator_configuration(self):
         self.elevatorConfig.read(self.ELEVATOR_CONFIGURATION_FILE)
