@@ -1,8 +1,8 @@
 import json
 import requests 
 import configparser
-from logic.Singleton import SingletonMeta
-from func.servercommunication import ServerCommunication
+from func.Singleton import SingletonMeta
+from logic.ServerCommunication import ServerCommunication
 from cached_property import cached_property
 
 class PropertiesManager(metaclass=SingletonMeta):

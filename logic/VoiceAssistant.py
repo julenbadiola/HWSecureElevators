@@ -2,8 +2,8 @@ import random
 import sys
 import time
 import os
-from logic.Singleton import SingletonMeta
-from logic.threading import threaded
+from func.Singleton import SingletonMeta
+from func.threading import threaded
 from time import sleep
 
 class VoiceAssistant(metaclass=SingletonMeta):

@@ -1,7 +1,6 @@
 import cv2
 import imutils
-import numpy as np
-from logic.Singleton import SingletonMeta
+from func.Singleton import SingletonMeta
 
 width = 800
 occupation = 0

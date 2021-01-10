@@ -3,7 +3,7 @@ import time
 import signal
 from lora.lora import LoraEndpoint
 from func import protocol as prot
-from logic.threading import threaded
+from func.threading import threaded
 
 THIS_FLOOR = 1
 lora_endpoint = LoraEndpoint()

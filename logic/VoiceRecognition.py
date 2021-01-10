@@ -1,7 +1,8 @@
 import speech_recognition as sr
+import asyncio
+
 from func.numparser import Text2Int
 from logic.VoiceAssistant import VoiceAssistant
-import asyncio
 from properties.properties import PropertiesManager as PM
 
 r = sr.Recognizer()

@@ -1,8 +1,8 @@
 import json
 import requests 
 import time
-from logic.Singleton import SingletonMeta
-from logic.threading import threaded, kill_thread
+from func.Singleton import SingletonMeta
+from func.threading import threaded, kill_thread
 
 #Incidence event types
 DISABLED_FLOOR = "disabledfloor"
@@ -13,11 +13,15 @@ class ServerCommunication(metaclass=SingletonMeta):
     PROPERTIES = None
     main_thread = None
     pool = []
+    active = True
 
     def __init__(self, properties):
         self.PROPERTIES = properties
         self.main_thread = self.thread_check_pool()
         print("BACKEND: Initialized")
+    
+    def set_active(self, active):
+        self.active = active
 
     def add_to_pool(self, url, data):
         obj = {
@@ -36,14 +40,17 @@ class ServerCommunication(metaclass=SingletonMeta):
     def thread_check_pool(self):
         while True:
             time.sleep(10)
-            for dataToSend in self.pool:
-                try:
-                    r = self.post_to_backend(dataToSend['url'], dataToSend['data'])
-                    if r and r.status_code == 200:
-                        print(f"BACKEND: Response for {dataToSend['url']}: {r.json()}")
-                        self.pool.remove(dataToSend)
-                except Exception as e:
-                    print(str(e))
+            if self.active:
+                for dataToSend in self.pool:
+                    try:
+                        r = self.post_to_backend(dataToSend['url'], dataToSend['data'])
+                        if r and r.status_code == 200:
+                            print(f"BACKEND: Response for {dataToSend['url']}: {r.json()}")
+                            self.pool.remove(dataToSend)
+                    except Exception as e:
+                        print(str(e))
+                else:
+                    #TODO Guardar datos en logs
 
     def post_to_backend(self, path, data):
         print(f"BACKEND: Posting {data} to backend")

@@ -4,13 +4,15 @@ from properties.properties import PropertiesManager
 import time
 import asyncio
 
-from logic.Singleton import SingletonMeta
 from logic.CapacityController import get_current_occupation
 from logic.VoiceAssistant import VoiceAssistant
 from logic.VoiceRecognition import wait_voice_input, check_floor_and_ride
-from logic.threading import threaded, kill_thread
+from logic.ServerCommunication import ServerCommunication, DISABLED_FLOOR, CAPACITY_OVER, EXCEPTION
+
 from func import protocol as prot
-from func.servercommunication import ServerCommunication, DISABLED_FLOOR, CAPACITY_OVER, EXCEPTION
+from func.Singleton import SingletonMeta
+from func.threading import threaded, kill_thread
+from cached_property import cached_property
 
 class Elevator(metaclass=SingletonMeta):
     #Static
@@ -50,6 +52,18 @@ class Elevator(metaclass=SingletonMeta):
             self.voice_assistant = VoiceAssistant(self)
             self.code = properties.ELEVATOR_CODE
             self.lora = lora
+
+            
+            ServerCommunication().set_active(self.data_retrieve_active)
+            if not self.data_retrieve_active:
+                print("FUNC: Server communication functionality is INACTIVE.")
+            else:
+                print("FUNC: Server communication functionality is active.")
+            if not self.voice_control_active:
+                print("FUNC: Voice control / recognition functionality is INACTIVE.")
+            else:
+                print("FUNC: Voice control / recognition functionality is active.")
+
             print("ELEV: Initialized successfully")
 
         except Exception as e:
@@ -68,6 +82,18 @@ class Elevator(metaclass=SingletonMeta):
             return self.ride_thread.is_alive()
         except Exception:
             return False
+    
+    @cached_property
+    def data_retrieve_active(self):
+        return "dataretrieve" in self.functionalities
+
+    @cached_property
+    def capacity_control_active(self):
+        return "capacitycontrol" in self.functionalities
+    
+    @cached_property
+    def voice_control_active(self):
+        return "voicecontrol" in self.functionalities
 
     @threaded
     def thread_check_calls(self):
@@ -84,7 +110,6 @@ class Elevator(metaclass=SingletonMeta):
     def call(self, where):
         if(self.valid_floor_selection(False, where)):
             print(f"ELEV: Elevator called in {where}")
-            #self.voice_assistant.add_to_pool(f"Elevador llamado en el piso {where}")
             ServerCommunication().send_call_data(where)
             self.calls_pool.append(where)
         else:
@@ -98,7 +123,8 @@ class Elevator(metaclass=SingletonMeta):
         #Matamos los hilos input si existen
         self.kill_floor_input_threads()
         #Activamos el reconocimiento por voz
-        self.voice_recog_thread = self.thread_voice_recognition_floor_input(speak)
+        if self.voice_control_active:
+            self.voice_recog_thread = self.thread_voice_recognition_floor_input(speak)
         #Activamos los botones (emulados por teclado)
         self.physic_button_thread = self.thread_physic_button_floor_input()
 
@@ -116,7 +142,7 @@ class Elevator(metaclass=SingletonMeta):
             time.sleep(2)
             asyncio.run(wait_voice_input(check_floor_and_ride))
         except Exception as e:
-            #ServerCommunication().send_incidence_data(EXCEPTION, str(e))
+            #if self.data_retrieve_active: ServerCommunication().send_incidence_data(EXCEPTION, str(e))
             self.voice_assistant.add_to_pool("Voice recognition could not be initialized.")
         
     def ride(self, destination, floor):

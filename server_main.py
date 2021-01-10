@@ -1,12 +1,11 @@
 import json
 from time import sleep
-from logic.threading import threaded
+from lora.lora import LoraEndpoint
 
 from properties.properties import PropertiesManager
 from logic.Elevator import Elevator
 from logic.CapacityController import initialize as initialize_capacity_controller
-
-from lora.lora import LoraEndpoint
+from func.threading import threaded
 from func import protocol
 
 properties = PropertiesManager()
@@ -35,8 +34,11 @@ if __name__ == "__main__":
     #Initializing
     elevator.call(0)
     thread_listen_to_floors()
-    initialize_capacity_controller()
-    
+    if elevator.capacity_control_active:
+        print("FUNC: Capacity control functionality is active.")
+        initialize_capacity_controller()
+    else:
+        print("FUNC: Capacity control functionality is INACTIVE.")
 
 
 
