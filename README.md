@@ -1,36 +1,41 @@
 # Secure Elevators
 ## Introducción
-El objetivo de este proyecto es proporcionar de los ascensores un espacio seguro donde se pudiera evitar el contacto con superficies y la ventilación estuviese asegurada, evitando así posibles infecciones por viruses como el SARS-CoV-2. 
+El objetivo de este proyecto es hacer de los ascensores un espacio seguro donde se pueda evitar el contacto con superficies y la ventilación estuviese asegurada, evitando así posibles infecciones por viruses como el SARS-CoV-2. Además, permite el control de aforo dentro del habitáculo haciendo uso del reconocimiento de imágenes y el control del elevador mediante comandos de voz.
 
-Para ello, el programa, escrito en Python3, es ejecutado sobre una serie de raspberry pi (3b); una de ellas adopta el rol de "Cabina", mientras que las demás son "Plantas". 
+El programa recopila información útil sobre el uso del elevador y la envía al servidor central, desarrollado por Julen Badiola haciendo uso del stack MERN (Mongo, Express, React y NodeJs) como proyecto para la asignatura Desarrollo Avanzado de Software. Además, el programa python adoptará las funcionalidades que el usuario haya activado en la interfaz web.
 
-> A partir de ahora, módulo de cabina se sustituirá por MC y módulo de planta por MP.
 
 > La URL del servidor es: https://secureelevatorsdemo.herokuapp.com
 
 ## Descripción componentes hardware
+La idea principal consiste en que se implante una raspberry en la cabina del ascensor y que adopte el rol de "módulo de cabina". Por el otro lado, una raspberry por cada planta y que adopte el rol "módulo de planta".
 
-Todas las raspberry utilizan un **SX1278 433MHz LoRa Module** para comunicarse. 
+Como nosotros disponemos de 2 raspberrys, por lo que una toma el rol de cabina y la otra de planta.
 
-En el caso del **MP**, también tiene conectados:
+> A partir de ahora, módulo de cabina se sustituirá por MC y módulo de planta por MP.
+
+En el caso del **MP**:
 
 | Elemento | Puerto de conexión |
 | --- | --- |
+| SX1278 433MHz LoRa Module | USB |
 | LEDs | Enumera todos los archivos nuevos o modificados |
 | Sensor de proximidad | Muestra las diferencias de archivo que no han sido preparadas |
 | Botones | Muestra las diferencias de archivo que no han sido preparadas |
 
 
-En el caso del **MC**, también tiene conectados:
+En el caso del **MC**:
 
 | Elemento | Puerto de conexión |
 | --- | --- |
+| SX1278 433MHz LoRa Module | USB |
 | Webcam | USB |
 | Micrófono | Integrado en la webcam, de modo que USB |
 | Altavoz | Jack 3.5mm o Bluetooth |
 
 
 ## Descripción software
+Para ello, el programa, escrito en Python3, es ejecutado sobre una serie de raspberry pi (3b). Una de ellas adopta el rol de "Cabina", mientras que las demás son "Plantas". 
 
 ### Descripción de la jerarquía de ficheros
 1. **/logic**: Directorio que contiene las clases de la lógica de negocio.
@@ -42,8 +47,9 @@ En el caso del **MC**, también tiene conectados:
     1. **CapacityController.py**: Alberga la funcionalidad de detección de personas en base a imágenes input. En nuestro caso, provenienen de la webcam.
     1. **/CapacityTestVideos**: Directorio que contiene dos vídeos para testear el funcionamiento del `CapacityController`. 
 1. **/func**: Directorio que contiene algunos métodos y clases genéricas.
-    1. **Singleton.py**: Metaclase de la que hacen uso todas las demás clases. Permite el patrón de diseño con ese nombre que permite restringir la creación de objetos pertenecientes a una clase o el valor de un tipo a un único objeto.
+    1. **Singleton.py**: Metaclase de la que hacen uso todas las demás clases. Aplica el patrón de diseño con ese nombre que permite restringir la creación de objetos pertenecientes a una clase o el valor de un tipo a un único objeto.
     1. **threading.py**: Contiene la clase `Thread_with_trace` y algunas subrutinas para el manejo de hilos. El objetivo es poder parar determinados hilos que se crean durante la ejecución. Además, define la anotación `threading` para definir métodos (dentro de los propios objetos) que son ejecutados en un hilo concurrente.
+    1. **sensors.py**: Fichero que alberga las clases referentes a los sensores LED, botones y sensor de proximidad en base a ultrasonidos.
     1. **numparser.py**: Funciones para detectar el piso al que quiere ir el usuario en base al texto que se ha detectado por su habla. 
     1. **protocol.py**: Asignación de variables y métodos de los que se hará uso para la transferencia de datos.
 1. **/lora**: Directorio que contiene lo referente a los módulos de Lora.

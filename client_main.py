@@ -5,8 +5,13 @@ from lora.lora import LoraEndpoint
 from func import protocol as prot
 from func.threading import threaded
 
+import prueba_cerc as ultra
+from func.sensors import LED, GroveUltrasonicRanger
+
 THIS_FLOOR = 1
 lora_endpoint = LoraEndpoint()
+led = LED(24)
+prox = GroveUltrasonicRanger(5)
 
 def timeout_handler(signum, frame):
     raise Exception("timeout reached")
@@ -18,7 +23,7 @@ def call_elevator(floor):
     encoded_data = prot.dump_data(data)
     lora_endpoint.write_string(encoded_data)
     #TODO: Enceder led parpadeante que significa que he llamado al ascensor
-
+    led.blink()
 
     #Listen to cabin por 10 seconds, if the elevator has not arrived, stop listening
     #This is because cannot call the elevator while listen_to_cabin is running, since lora module is busy
@@ -39,7 +44,7 @@ def listen_to_cabin():
                 
             if prot.ELEVATOR_ARRIVE in data:
                 #TODO: Apagar LED
-                
+                led.stop_blink()
                 arrived_to = int(data[prot.ELEVATOR_ARRIVE])
                 print(f"Received elevator arrived {arrived_to}")
                 break
@@ -53,13 +58,14 @@ if __name__ == "__main__":
         try:
             #Emulador botón físico
             #TODO: if sensor proximidad detecta algo o el boton es presionado => call_elevator
-            print(f'Llamas desde el {THIS_FLOOR}:')
-            x = input()
-
-
-            call_elevator(THIS_FLOOR)
+            dist = prox.get_distance()
+            print(f"DISTANCE: {dist}")
+            if dist < 2:
+                call_elevator(THIS_FLOOR)
+            
         except Exception as e:
             print(f"EXCEPTION IN thread_main {str(e)}")
 
         time.sleep(3)
     
+

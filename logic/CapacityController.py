@@ -30,10 +30,10 @@ def initialize():
         # if the frame could not be grabbed, then we have reached the end
         # of the video
         if not grabbed:
-            # break
-            camera = cv2.VideoCapture("logic/CapacityTestVideos/test2.mp4")
-            continue
-
+            #camera = cv2.VideoCapture("logic/CapacityTestVideos/test2.mp4")
+            #continue
+            break
+        
         # resize the frame, convert it to grayscale, and blur it
         frame = imutils.resize(frame, width=width)
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)

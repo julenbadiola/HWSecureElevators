@@ -51,6 +51,7 @@ class ServerCommunication(metaclass=SingletonMeta):
                         print(str(e))
                 else:
                     #TODO Guardar datos en logs
+                    pass
 
     def post_to_backend(self, path, data):
         print(f"BACKEND: Posting {data} to backend")
