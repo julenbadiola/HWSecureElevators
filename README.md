@@ -118,3 +118,5 @@ Github repo: [PeopleCounter by LukashenkoEvegeniy](https://github.com/Lukashenko
 1. **Se necesita leer y escribir en lora**: Solucion
 1. **Problema**: Solucion
 1. **VoiceAssistant en español**: Solucion
+1. **Calldata attended**: Solucion
+

@@ -108,9 +108,9 @@ class Elevator(metaclass=SingletonMeta):
 
     #BUSINESS LOGIC
     def call(self, where):
+        #ServerCommunication().send_call_data(where)
         if(self.valid_floor_selection(False, where)):
             print(f"ELEV: Elevator called in {where}")
-            ServerCommunication().send_call_data(where)
             self.calls_pool.append(where)
         else:
             print(f"ELEV: Elevator called in inactive floor {where}")
@@ -119,12 +119,12 @@ class Elevator(metaclass=SingletonMeta):
         self.voice_recog_thread = kill_thread(self.voice_recog_thread)
         self.physic_button_thread = kill_thread(self.physic_button_thread)
 
-    def wait_for_floor_input(self, speak):
+    def wait_for_floor_input(self):
         #Matamos los hilos input si existen
         self.kill_floor_input_threads()
         #Activamos el reconocimiento por voz
         if self.voice_control_active:
-            self.voice_recog_thread = self.thread_voice_recognition_floor_input(speak)
+            self.voice_recog_thread = self.thread_voice_recognition_floor_input()
         #Activamos los botones (emulados por teclado)
         self.physic_button_thread = self.thread_physic_button_floor_input()
 
@@ -135,14 +135,11 @@ class Elevator(metaclass=SingletonMeta):
         self.ride(True, int(x))
 
     @threaded
-    def thread_voice_recognition_floor_input(self, speak):
+    def thread_voice_recognition_floor_input(self):
         try:
-            if speak:
-                self.voice_assistant.add_to_pool('Speak the floor you want to go.')
-            time.sleep(2)
             asyncio.run(wait_voice_input(check_floor_and_ride))
         except Exception as e:
-            #if self.data_retrieve_active: ServerCommunication().send_incidence_data(EXCEPTION, str(e))
+            #ServerCommunication().send_incidence_data(EXCEPTION, str(e))
             self.voice_assistant.add_to_pool("Voice recognition could not be initialized.")
         
     def ride(self, destination, floor):
@@ -152,7 +149,7 @@ class Elevator(metaclass=SingletonMeta):
     @threaded
     def thread_ride(self, destination, floorToGo):
         start = time.time()
-        if (floorToGo == None):
+        if floorToGo == None:
             return
         
         occupation = get_current_occupation()
@@ -182,8 +179,10 @@ class Elevator(metaclass=SingletonMeta):
             self.open_doors()
 
             #If this floor is the destination, dont say: where do you want to go?
-            speak = not destination
-            self.wait_for_floor_input(speak)
+            if not destination:
+                self.voice_assistant.add_to_pool('Speak the floor you want to go.')
+                time.sleep(2)
+            self.wait_for_floor_input()
             
         print(f"ELEV: Ride to {floorToGo} finished.")
         try:

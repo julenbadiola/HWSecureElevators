@@ -16,6 +16,19 @@ class PropertiesManager(metaclass=SingletonMeta):
         self.elevatorConfig = configparser.RawConfigParser()
         self.SERVER_COMMUNICATION = ServerCommunication(self)
 
+    #CLIENT PROPERTIES
+    @cached_property
+    def THIS_FLOOR(self):
+        return str(self.config.get('CLIENT', 'THIS_FLOOR'))
+
+    @cached_property
+    def LED_PIN(self):
+        return int(self.config.get('CLIENT', 'LED_PIN'))
+
+    @cached_property
+    def PROXIMITY_PIN(self):
+        return int(self.config.get('CLIENT', 'PROXIMITY_PIN'))
+
     #SERVER PROPERTIES
     @cached_property
     def BACKEND_URL(self):

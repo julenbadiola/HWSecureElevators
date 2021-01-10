@@ -7,48 +7,55 @@ from func.threading import threaded
 
 import prueba_cerc as ultra
 from func.sensors import LED, GroveUltrasonicRanger
+from properties.properties import PropertiesManager
 
-THIS_FLOOR = 1
+properties = PropertiesManager()
+
 lora_endpoint = LoraEndpoint()
-led = LED(24)
-prox = GroveUltrasonicRanger(5)
+led = LED(properties.LED_PIN)
+prox = GroveUltrasonicRanger(properties.PROXIMITY_PIN)
 
 def timeout_handler(signum, frame):
     raise Exception("timeout reached")
 
-def call_elevator(floor):
+def call_elevator():
     data = {
-        prot.ELEVATOR_CALL: floor,
+        prot.ELEVATOR_CALL: properties.THIS_FLOOR,
     }
     encoded_data = prot.dump_data(data)
     lora_endpoint.write_string(encoded_data)
-    #TODO: Enceder led parpadeante que significa que he llamado al ascensor
+    # TODO: Enceder led parpadeante que significa que he llamado al ascensor
     led.blink()
 
-    #Listen to cabin por 10 seconds, if the elevator has not arrived, stop listening
-    #This is because cannot call the elevator while listen_to_cabin is running, since lora module is busy
+    # Listen to cabin for 40 seconds, if the elevator has not arrived, stop listening
+    # This is because cannot call the elevator while listen_to_cabin is running, since lora module is busy
     signal.signal(signal.SIGALRM, timeout_handler)
-    signal.alarm(10)
+    signal.alarm(40)
     try:
         listen_to_cabin()
 
     except Exception as e:
         print(f"listen_to_cabin {str(e)}")
 
+
 def listen_to_cabin():
-    #Listen to cabin ELEVATOR_ARRIVE events
+    # Listen to cabin ELEVATOR_ARRIVE events
+    start = time.time()
     while True:
         try:
             print("FLOOR: Waiting to receive arrived message from elevator...")
             data = prot.clean_data(lora_endpoint.read())
-                
+
             if prot.ELEVATOR_ARRIVE in data:
-                #TODO: Apagar LED
+                # TODO: Apagar LED
                 led.stop_blink()
                 arrived_to = int(data[prot.ELEVATOR_ARRIVE])
-                print(f"Received elevator arrived {arrived_to}")
-                break
-            
+                print(
+                    f"Received elevator arrived to {arrived_to}. This floor {arrived_to == properties.THIS_FLOOR}")
+
+                if arrived_to == properties.THIS_FLOOR:
+                    break
+
         except Exception as e:
             print(f"EXCEPTION IN Listen_to_cabin {str(e)}")
 
@@ -56,16 +63,14 @@ if __name__ == "__main__":
     print("Lora [OK]")
     while True:
         try:
-            #Emulador botón físico
-            #TODO: if sensor proximidad detecta algo o el boton es presionado => call_elevator
+            # Emulador botón físico
+            # TODO: if sensor proximidad detecta algo o el boton es presionado => call_elevator
             dist = prox.get_distance()
             print(f"DISTANCE: {dist}")
             if dist < 2:
-                call_elevator(THIS_FLOOR)
-            
+                call_elevator()
+
         except Exception as e:
             print(f"EXCEPTION IN thread_main {str(e)}")
 
         time.sleep(3)
-    
-

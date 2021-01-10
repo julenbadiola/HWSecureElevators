@@ -76,12 +76,14 @@ class ServerCommunication(metaclass=SingletonMeta):
             return None
 
     #Specific
-    def send_call_data(self, inFloor):
+    def send_call_data(self, inFloor, delayedTime=None):
         url =  self.PROPERTIES.POST_CALL_URL
         data = {
             "elevator": self.PROPERTIES.ELEVATOR_ID,
             "floor": int(inFloor)
         }
+        if delayedTime:
+            data["delayedTime"] = delayedTime
         self.add_to_pool(url, data)
 
     def send_ride_data(self, fromFloor, toFloor, time, numPassengers):

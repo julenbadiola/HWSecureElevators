@@ -5,6 +5,7 @@ from func.Singleton import SingletonMeta
 width = 800
 occupation = 0
 
+
 def get_current_occupation():
     return occupation
 
@@ -31,9 +32,9 @@ def initialize():
         # of the video
         if not grabbed:
             #camera = cv2.VideoCapture("logic/CapacityTestVideos/test2.mp4")
-            #continue
+            # continue
             break
-        
+
         # resize the frame, convert it to grayscale, and blur it
         frame = imutils.resize(frame, width=width)
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
@@ -72,8 +73,8 @@ def initialize():
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
 
-        occupation = people
-        cv2.putText(frame, "Occupation: {}".format(str(occupation)), (10, 50),
+        occupation = people + 1
+        cv2.putText(frame, "Occupation: {}".format(str(occupation - 1)), (10, 50),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
         cv2.imshow("Security Feed", frame)
 
