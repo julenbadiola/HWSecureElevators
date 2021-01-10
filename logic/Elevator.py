@@ -53,7 +53,6 @@ class Elevator(metaclass=SingletonMeta):
             self.code = properties.ELEVATOR_CODE
             self.lora = lora
 
-            
             ServerCommunication().set_active(self.data_retrieve_active)
             if not self.data_retrieve_active:
                 print("FUNC: Server communication functionality is INACTIVE.")
@@ -101,17 +100,18 @@ class Elevator(metaclass=SingletonMeta):
         while True:
             time.sleep(1)
             if not self.riding and len(self.calls_pool) > 0:
-                #print(f"ELEV: {self.calls_pool}.")
-                toFloor = self.calls_pool[0]
-                if toFloor is not None:
-                    self.ride(False, toFloor)
+                call = self.calls_pool[0]
+                if call is not None:
+                    self.ride(False, call)
 
     #BUSINESS LOGIC
     def call(self, where):
-        #ServerCommunication().send_call_data(where)
         if(self.valid_floor_selection(False, where)):
             print(f"ELEV: Elevator called in {where}")
-            self.calls_pool.append(where)
+            self.calls_pool.append({
+                "calltime": time.time(),
+                "floor": where
+                })
         else:
             print(f"ELEV: Elevator called in inactive floor {where}")
 
@@ -142,13 +142,14 @@ class Elevator(metaclass=SingletonMeta):
             #ServerCommunication().send_incidence_data(EXCEPTION, str(e))
             self.voice_assistant.add_to_pool("Voice recognition could not be initialized.")
         
-    def ride(self, destination, floor):
-        self.ride_thread = self.thread_ride(destination, floor)
+    def ride(self, destination, call):
+        self.ride_thread = self.thread_ride(destination, call)
         self.kill_floor_input_threads()
 
     @threaded
-    def thread_ride(self, destination, floorToGo):
+    def thread_ride(self, destination, call):
         start = time.time()
+        floorToGo = call["floor"]
         if floorToGo == None:
             return
         
@@ -185,6 +186,13 @@ class Elevator(metaclass=SingletonMeta):
             self.wait_for_floor_input()
             
         print(f"ELEV: Ride to {floorToGo} finished.")
+        #Send data about the call to the server
+        try:
+            delayedTime = call["calltime"] - time.time()
+            ServerCommunication().send_call_data(floorToGo, delayedTime)
+        except Exception as e:
+            print(e)
+            
         try:
             self.add_pool_arrived_lora(floorToGo)
             self.calls_pool.remove(floorToGo)
