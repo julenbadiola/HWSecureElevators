@@ -38,15 +38,12 @@ class Button(object):
     button = None
     pin = None
  
-    def __init__(self, PIN, _callback=None):
+    def __init__(self, PIN):
         self.pin = PIN
-        self.button = GPIO(PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-        
-        if _callback:
-            GPIO.add_event_detect(PIN,GPIO.RISING,callback=_callback)
+        self.button = GPIO(PIN, GPIO.IN)
 
     def is_pressed(self):
-        return GPIO.input(self.pin)
+        return self.button.read() == 1
 
 class GroveUltrasonicRanger(object):
     def __init__(self, pin):

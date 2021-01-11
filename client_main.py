@@ -11,7 +11,7 @@ properties = PropertiesManager()
 lora_endpoint = LoraEndpoint()
 #SENSORS
 led = LED(properties.LED_PIN)
-but = Button(properties.BUTTON_PIN, call_elevator)
+but = Button(properties.BUTTON_PIN)
 prox = GroveUltrasonicRanger(properties.PROXIMITY_PIN)
 
 def timeout_handler(signum, frame):
@@ -65,10 +65,10 @@ if __name__ == "__main__":
             # TODO: if sensor proximidad detecta algo o el boton es presionado => call_elevator
             dist = prox.get_distance()
             print(f"DISTANCE: {dist}")
-            if dist < 2:
+            if but.is_pressed() or dist < 2:
                 call_elevator()
 
         except Exception as e:
             print(f"EXCEPTION IN thread_main {str(e)}")
 
-        time.sleep(3)
+        time.sleep(2)
