@@ -10,7 +10,8 @@ from func import protocol
 
 properties = PropertiesManager()
 lora = LoraEndpoint()
-elevator = Elevator(properties, lora)
+buttonsEmulator = Button(properties.BUTTON_PIN)
+elevator = Elevator(properties, lora, buttonsEmulator)
 
 @threaded
 def thread_listen_to_floors():

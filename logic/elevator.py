@@ -36,12 +36,14 @@ class Elevator(metaclass=SingletonMeta):
     ride_thread = None
     voice_recog_thread = None
     physic_button_thread = None
+    buttons_emulator = None
 
     #INITIALIZATION
-    def __init__(self, properties, lora):
+    def __init__(self, properties, lora, buttonsEmulator):
         print(f"ELEV: Initializing elevator")
         #Get configuration from backend or file
         config = properties.get_elevator_configuration()
+        self.buttons_emulator = buttonsEmulator
         try:
             self.id = json.loads(config['DEFAULT']['ID'])
             self.functionalities = json.loads(config['DEFAULT']['FUNCTIONALITIES'])
@@ -130,9 +132,15 @@ class Elevator(metaclass=SingletonMeta):
 
     @threaded
     def thread_physic_button_floor_input(self):
-        print('VAS AL PISO:')
-        x = input()
-        self.ride(True, int(x))
+        while True:
+            if self.buttons_emulator.is_pressed():
+                print("PRESSED BUTTON")
+                done = False
+                while not done:
+                    floor = random.randint(0,len(self.floors))
+                    if floor != self.where:
+                        print(f"PRESSED BUTTON, GOING TO {floor}")
+                        self.ride(True, floor)
 
     @threaded
     def thread_voice_recognition_floor_input(self):

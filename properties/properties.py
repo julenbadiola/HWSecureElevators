@@ -28,6 +28,10 @@ class PropertiesManager(metaclass=SingletonMeta):
     @cached_property
     def PROXIMITY_PIN(self):
         return int(self.config.get('CLIENT', 'PROXIMITY_PIN'))
+    
+    @cached_property
+    def BUTTON_PIN(self):
+        return int(self.config.get('CLIENT', 'PROXIMITY_PIN'))
 
     #SERVER PROPERTIES
     @cached_property

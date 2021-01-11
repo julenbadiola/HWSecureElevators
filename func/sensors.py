@@ -34,6 +34,20 @@ class LED(object):
             else:
                 time.sleep(1)
  
+class Button(object):
+    button = None
+    pin = None
+ 
+    def __init__(self, PIN, _callback=None):
+        self.pin = PIN
+        self.button = GPIO(PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+        
+        if _callback:
+            GPIO.add_event_detect(PIN,GPIO.RISING,callback=_callback)
+
+    def is_pressed(self):
+        return GPIO.input(self.pin)
+
 class GroveUltrasonicRanger(object):
     def __init__(self, pin):
         self.dio =GPIO(pin)

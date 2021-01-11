@@ -4,13 +4,14 @@ import signal
 from lora.lora import LoraEndpoint
 from func import protocol as prot
 from func.threading import threaded
-from func.sensors import LED, GroveUltrasonicRanger
+from func.sensors import LED, GroveUltrasonicRanger, Button
 from properties.properties import PropertiesManager
 
 properties = PropertiesManager()
-
 lora_endpoint = LoraEndpoint()
+#SENSORS
 led = LED(properties.LED_PIN)
+but = Button(properties.BUTTON_PIN, call_elevator)
 prox = GroveUltrasonicRanger(properties.PROXIMITY_PIN)
 
 def timeout_handler(signum, frame):
@@ -22,7 +23,7 @@ def call_elevator():
     }
     encoded_data = prot.dump_data(data)
     lora_endpoint.write_string(encoded_data)
-    # TODO: Enceder led parpadeante que significa que he llamado al ascensor
+    # Enceder led parpadeante que significa que he llamado al ascensor
     led.blink()
 
     # Listen to cabin for 40 seconds, if the elevator has not arrived, stop listening
