@@ -2,9 +2,8 @@ import sys
 from grove.gpio import GPIO
 from func.threading import threaded
 import time
-from grove.button import Button
-from grove.factory import Factory
- 
+import grovepi
+
 usleep = lambda x: time.sleep(x / 1000000.0)
  
 _TIMEOUT1 = 1000
@@ -37,52 +36,30 @@ class LED(object):
             else:
                 time.sleep(1)
  
-class GroveButton(object):
+class Button(object):
     pressed = False
+    pin = None
+    callback = None
 
-    def __init__(self, pin):
+    def __init__(self, pin, _callback = None):
         # High = pressed
-        self.__btn = Factory.getButton("GPIO-HIGH", pin)
-        self.__last_time = time.time()
-        self.__on_press = None
-        self.__on_release = None
-        self.__btn.on_event(self, GroveButton.__handle_event)
- 
-    @property
-    def on_press(self):
-        print("PRESSED BUTTON")
-        self.pressed = True
-        return self.__on_press
-
-    @on_press.setter
-    def on_press(self, callback):
-        if not callable(callback):
-            return
-        self.__on_press = callback
- 
-    @property
-    def on_release(self):
-        print("RELEASED BUTTON")
-        self.pressed = False
-        return self.__on_release
- 
-    @on_release.setter
-    def on_release(self, callback):
-
-        if not callable(callback):
-            return
-        self.__on_release = callback
- 
-    def __handle_event(self, evt):
-        dt, self.__last_time = evt["time"] - self.__last_time, evt["time"]
-        # print("event index:{} event:{} pressed:{}".format(evt["index"], evt["code"], evt["pressed"]))
-        if evt["code"] == Button.EV_LEVEL_CHANGED:
-            if evt["pressed"]:
-                if callable(self.__on_press):
-                    self.__on_press(dt)
+        self.button = grovepi.pinMode(pin,"INPUT")
+        self.pin = pin
+        self.callback = _callback
+        self.thread_button()
+    
+    @threaded
+    def thread_button(self):
+        while True:
+            time.sleep(.5)
+            if grovepi.digitalRead(self.pin):
+                if not self.pressed:
+                    print(f"BUTTON {self.pin} PRESSED")
+                    self.pressed = True
+                    if self.callback:
+                        self.callback()
             else:
-                if callable(self.__on_release):
-                    self.__on_release(dt)
+                self.pressed = False
 
 class GroveUltrasonicRanger(object):
     def __init__(self, pin):

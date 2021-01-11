@@ -20,9 +20,8 @@ class VentilationManager(metaclass=SingletonMeta):
     @threaded
     def thread_main(self):
         while True:
-            sleep(5)
+            time.sleep(5)
             isInactive = (time.time() - self.elevator.last_ride_time) > 10
             isUnocuppied = (get_current_occupation() - 1) <= 0
-            print(f"VENTIL: Ventilating {isInactive}, {isUnoccupied}")
-            if not self.elevator.riding and isInactive and isUnoccupied:
+            if not self.elevator.riding and isInactive and isUnocuppied:
                 print("VENTIL: Ventilating")

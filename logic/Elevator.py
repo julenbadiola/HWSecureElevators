@@ -11,6 +11,7 @@ from logic.ServerCommunication import ServerCommunication, DISABLED_FLOOR, CAPAC
 from logic.VentilationManager import VentilationManager
 
 from func import protocol as prot
+from func.sensors import Button
 from func.Singleton import SingletonMeta
 from func.threading import threaded, kill_thread
 from cached_property import cached_property
@@ -43,12 +44,11 @@ class Elevator(metaclass=SingletonMeta):
     ventilation_manager = None
     last_ride_time = None
     #INITIALIZATION
-    def __init__(self, properties, lora, but):
+    def __init__(self, properties, lora):
         print(f"ELEV: Initializing elevator")
         #Get configuration from backend or file
         config = properties.get_elevator_configuration()
-        self.buttons_emulator = but
-        self.buttons_emulator.on_press = self.physic_button_floor_input
+        self.buttons_emulator = Button(properties.BUTTON_PIN, self.physic_button_floor_input)
         
         try:
             self.id = json.loads(config['DEFAULT']['ID'])

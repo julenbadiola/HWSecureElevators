@@ -4,14 +4,14 @@ import signal
 from lora.lora import LoraEndpoint
 from func import protocol as prot
 from func.threading import threaded
-from func.sensors import LED, GroveUltrasonicRanger, GroveButton
+from func.sensors import LED, GroveUltrasonicRanger, Button
 from properties.properties import PropertiesManager
 
 properties = PropertiesManager()
 lora_endpoint = LoraEndpoint()
 #SENSORS
 led = LED(properties.LED_PIN)
-but = GroveButton(properties.BUTTON_PIN)
+but = Button(properties.BUTTON_PIN)
 prox = GroveUltrasonicRanger(properties.PROXIMITY_PIN)
 
 def timeout_handler(signum, frame):
