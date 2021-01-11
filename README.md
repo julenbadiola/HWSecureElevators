@@ -1,9 +1,10 @@
 # Secure Elevators
 ## Introducción
-El objetivo de este proyecto es hacer de los elevadores un espacio seguro donde se pueda evitar el contacto con superficies y la ventilación estuviese asegurada, evitando así posibles infecciones por viruses como el SARS-CoV-2. Además, permite el control de aforo dentro del habitáculo haciendo uso del reconocimiento de imágenes y el control del elevador mediante comandos de voz.
+El objetivo de este proyecto es hacer de los elevadores un espacio seguro donde se pueda evitar el contacto con superficies y la ventilación esté asegurada, evitando así posibles infecciones por viruses como el SARS-CoV-2. Para ello, también permite el control de aforo dentro del habitáculo haciendo uso del reconocimiento de imágenes y el control del elevador mediante comandos de voz.
 
-El programa recopila información útil sobre el uso del elevador y la envía al servidor central, desarrollado por Julen Badiola haciendo uso del stack MERN (Mongo, Express, React y NodeJs) como proyecto para la asignatura Desarrollo Avanzado de Software. Además, el programa python adoptará las funcionalidades que el usuario haya activado en la interfaz web.
+El programa adoptará las funcionalidades que el usuario haya activado en la interfaz web alojada en un dyno de Heroku. Este cliente web y API ha sido desarrollado por Julen Badiola haciendo uso del stack MERN (Mongo, Express, React y NodeJs) como proyecto para la asignatura Desarrollo Avanzado de Software. Por otro lado, el programa recopila información útil sobre el uso del elevador y la envía al servidor central mencionado, donde podrán verse estadísticas de uso. 
 
+![Interfaz web.](/multimedia/animated.gif "Interfaz web.")
 
 > La URL del servidor es: https://secureelevatorsdemo.herokuapp.com
 
@@ -69,13 +70,14 @@ En el caso del **MC**:
     1. **VoiceRecognition.py**: Fichero que alberga algunas funciones asíncronas (haciendo uso de `asyncio`) que transforman el habla en texto mediante llamadas a la API de Google Speech (lo hace internamente la librería `speech_recognition`).
     1. **CapacityController.py**: Alberga la funcionalidad de detección de personas en base a imágenes input. En nuestro caso, provenienen de la webcam.
     1. **VentilationManager.py**: Alberga la clase singleton responsable de activa la ventilación en caso de que se cumplan ciertas condiciones, como que el tiempo de inactividad del elevador sea superior a 10 segundos.
-    1. **/CapacityTestVideos**: Directorio que contiene dos vídeos para testear el funcionamiento del `CapacityController`. 
+    
 1. **/func**: Directorio que contiene algunos métodos y clases genéricas.
     1. **Singleton.py**: Metaclase de la que hacen uso algunas de las clases. Aplica el patrón de diseño con ese nombre que permite restringir la creación de objetos pertenecientes a una clase o el valor de un tipo a un único objeto.
     1. **threading.py**: Contiene la clase `Thread_with_trace` y algunas subrutinas para el manejo de hilos. El objetivo es poder parar determinados hilos que se crean durante la ejecución. Además, define la anotación `threading` para definir métodos (dentro de los propios objetos) que son ejecutados en un hilo concurrente.
     1. **sensors.py**: Fichero que alberga las clases referentes a los sensores LED, botones y sensor de proximidad en base a ultrasonidos.
     1. **numparser.py**: Funciones para detectar el piso al que quiere ir el usuario en base al texto que se ha detectado por su habla. 
     1. **protocol.py**: Asignación de variables y métodos de los que se hará uso para la transferencia de datos.
+1. **/multimedia**: Directorio con imágenes y vídeos para el testeo y documentación.
 1. **/lora**: Directorio que contiene lo referente a los módulos de Lora.
 
 1. **/properties**: Directorio que contiene lo referente al manejo de los archivos de configuración.

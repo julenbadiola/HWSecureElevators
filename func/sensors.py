@@ -14,8 +14,8 @@ class LED(object):
     blinking = False
     thread = None
  
-    def __init__(self, PIN):
-        self.led = GPIO(PIN, GPIO.OUT)
+    def __init__(self, _pin):
+        self.led = GPIO(_pin, GPIO.OUT)
         self.thread = self.thread_blink()
  
     def blink(self):
@@ -39,13 +39,11 @@ class LED(object):
 class Button(object):
     button = None
     pressed = False
-    pin = None
     callback = None
 
-    def __init__(self, PIN, _callback = None):
+    def __init__(self, _pin, _callback = None):
         # High = pressed
-        self.button = GPIO(PIN, GPIO.IN)
-        self.pin = PIN
+        self.button = GPIO(_pin, GPIO.IN)
         self.callback = _callback
         self.thread_button()
     
@@ -62,8 +60,8 @@ class Button(object):
                 self.pressed = False
 
 class GroveUltrasonicRanger(object):
-    def __init__(self, pin):
-        self.dio =GPIO(pin)
+    def __init__(self, _pin):
+        self.dio =GPIO(_pin)
  
     def _get_distance(self):
         self.dio.dir(GPIO.OUT)
