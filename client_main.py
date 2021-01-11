@@ -4,8 +4,6 @@ import signal
 from lora.lora import LoraEndpoint
 from func import protocol as prot
 from func.threading import threaded
-
-import prueba_cerc as ultra
 from func.sensors import LED, GroveUltrasonicRanger
 from properties.properties import PropertiesManager
 
@@ -47,13 +45,12 @@ def listen_to_cabin():
             data = prot.clean_data(lora_endpoint.read())
 
             if prot.ELEVATOR_ARRIVE in data:
-                # TODO: Apagar LED
-                led.stop_blink()
                 arrived_to = int(data[prot.ELEVATOR_ARRIVE])
                 print(
                     f"Received elevator arrived to {arrived_to}. This floor {arrived_to == properties.THIS_FLOOR}")
 
                 if arrived_to == properties.THIS_FLOOR:
+                    led.stop_blink()
                     break
 
         except Exception as e:

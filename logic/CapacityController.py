@@ -78,5 +78,5 @@ def initialize():
                     cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
         cv2.imshow("Security Feed", frame)
 
-    video.release()
+    camera.release()
     cv2.destroyAllWindows()

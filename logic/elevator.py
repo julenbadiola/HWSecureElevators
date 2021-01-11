@@ -172,7 +172,7 @@ class Elevator(metaclass=SingletonMeta):
             self.close_doors()
             self.voice_assistant.add_to_pool(f"Elevator going to {floorToGo}.")
             for i in range(0, diff):
-                time.sleep(2)
+                time.sleep(3)
                 print(f"ELEV: Riding to {floorToGo}. Now in {i}")
 
             ServerCommunication().send_ride_data(self.where, floorToGo, time.time() - start, occupation)
@@ -195,7 +195,7 @@ class Elevator(metaclass=SingletonMeta):
             
         try:
             self.add_pool_arrived_lora(floorToGo)
-            self.calls_pool.remove(floorToGo)
+            self.calls_pool.remove(call)
         except Exception as e:
             #Si tira error es porque no es un call, el ride se ha activado desde el recog o los botones
             pass
