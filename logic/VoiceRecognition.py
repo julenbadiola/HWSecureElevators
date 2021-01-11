@@ -12,7 +12,7 @@ r = sr.Recognizer()
 async def wait_for_confirmation(reason):
     va = VoiceAssistant()
     va.add_to_pool(f'Esperando confirmación para {reason}')
-    with sr.Microphone(device_index=2) as source:
+    with sr.Microphone(device_index=1) as source:
         while True:
             audio = r.listen(source)
             try:
@@ -35,14 +35,14 @@ def cleanTextForNumbers(text):
     return res
 
 async def check_floor_and_ride(elevator, text):
-    print(f"Recognizing {text}")
+    #print(f"Recognizing {text}")
     floors = cleanTextForNumbers(text)
-    print(f"Floors {text}")
-    if len(floors) > 1:
+    #print(f"Floors {floors}")
+    if len(floors) > 0:
         #print(f'VOICEREC: {floors} detected in the speech.')
         floor = floors[0]
         
-        print(f"Recognized {floor}")
+        #print(f"Recognized {floor}")
         if elevator.valid_floor_selection(True, floor):
             """confirmation = await wait_for_confirmation(f"ir al piso {floor}")
             if confirmation:"""
@@ -52,7 +52,7 @@ async def check_floor_and_ride(elevator, text):
 
 async def loop_voice_input(elevator):
     try:
-        with sr.Microphone(device_index=2) as source:
+        with sr.Microphone(device_index=1) as source:
             while True: 
                 if elevator.waitingForInput:
                     try:
@@ -68,7 +68,6 @@ async def loop_voice_input(elevator):
 
                     except Exception as e:
                         print("VOICEREC controlled exception: ", str(e))
-                time.sleep(1)
             #print("VOICE RECOGNITION STOPPED")
         print("VOICEREC: Stopped")
     except Exception as e:

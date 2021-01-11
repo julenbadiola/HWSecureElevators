@@ -56,6 +56,8 @@ def listen_to_cabin():
 
         except Exception as e:
             print(f"EXCEPTION IN Listen_to_cabin {str(e)}")
+            led.stop_blink()
+            break
 
 def exit():
     print("STOP BLINK")
@@ -77,7 +79,7 @@ if __name__ == "__main__":
                 # TODO: if sensor proximidad detecta algo o el boton es presionado => call_elevator
                 dist = prox.get_distance()
                 print(f"DISTANCE: {dist} and BUTTON: {but.pressed}")
-                if but.pressed or dist < 2:
+                if but.pressed or dist < 4:
                     call_elevator()
 
             except Exception as e:
