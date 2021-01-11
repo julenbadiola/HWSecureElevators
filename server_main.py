@@ -28,6 +28,15 @@ def thread_listen_to_floors():
         except Exception as e:
             pass
 
+def exit():
+    print("CLEANING GPIOs")
+    GPIO.cleanup()
+    print('Interrupted')
+    try:
+        sys.exit(0)
+    except SystemExit:
+        os._exit(0)
+
 if __name__ == "__main__":
     print("==================== SERVER SECURE ELEVATORS ===================== \n")
     try:
@@ -41,6 +50,6 @@ if __name__ == "__main__":
             print("FUNC: Capacity control functionality is INACTIVE.")
 
     except Exception as e:
-        print("CLEANING GPIOs")
-        GPIO.cleanup()
-
+        exit()
+    except KeyboardInterrupt:
+        exit()

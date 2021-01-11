@@ -1,9 +1,11 @@
 import speech_recognition as sr
 import asyncio
+import time
 
 from func.numparser import Text2Int
 from logic.VoiceAssistant import VoiceAssistant
 from properties.properties import PropertiesManager as PM
+from func.threading import threaded
 
 r = sr.Recognizer()
 
@@ -23,16 +25,6 @@ async def wait_for_confirmation(reason):
             except Exception as e:
                 return False
 
-def tries_advice(tries_left):
-    tosay = "Vuelva a pronunciarlo. "
-    if tries_left > 1:
-        tosay += f"Quedan {tries_left} intentos"
-    elif tries_left == 1:
-        tosay += f"Queda un intento"
-    else:
-        tosay = f"No he entendido por {PM().NUMBER_OF_TRIES_SPEECH} veces. Utilice los botones físicos"
-    return tosay
-
 def cleanTextForNumbers(text):
     res = []
     for s in text.split():
@@ -42,44 +34,44 @@ def cleanTextForNumbers(text):
             res.append(r)
     return res
 
-async def check_floor_and_ride(text):
+async def check_floor_and_ride(elevator, text):
     print(f"Recognizing {text}")
-    elevator = VoiceAssistant().elevator
     floors = cleanTextForNumbers(text)
-    if len(floors) == 1:
+    if len(floors) > 1:
         #print(f'VOICEREC: {floors} detected in the speech.')
         floor = floors[0]
         
         if elevator.valid_floor_selection(True, floor):
-            """confirmation = await wait_for_confirmation(f"ir al piso {floor}")
+            confirmation = await wait_for_confirmation(f"ir al piso {floor}")
             if confirmation:
-                elevator.ride(True, floor)
-                return True"""
-            elevator.ride(True, floor)
-            return True
-    return False
+                return floor
+    return None
 
-async def wait_voice_input(_callback = None):
+async def loop_voice_input(elevator):
     try:
         with sr.Microphone(device_index=2) as source:
             while True: 
-                try:
-                    print("RECONOCIENDO...")
-                    audio = r.listen(source)
-                    text = r.recognize_google(audio, language="es-ES")
-                    print(text.lower())
-                    
-                    if PM().SPEECH_KEYWORD.lower() in text.lower():
-                        if _callback:
-                            if await _callback(text):
-                                break
+                if elevator.waitingForInput:
+                    try:
+                        print("RECONOCIENDO...")
+                        audio = r.listen(source)
+                        text = r.recognize_google(audio, language="es-ES")
+                        print(text.lower())
+                        
+                        if PM().SPEECH_KEYWORD.lower() in text.lower():
+                            floor = await check_floor_and_ride(elevator, text)
+                            if elevator.waitingForInput and floor != None:
+                                elevator.ride(True, floor)
 
-                except Exception as e:
-                    print("VOICEREC EXCEPTION ", str(e))
+                    except Exception as e:
+                        print("VOICEREC controlled exception: ", str(e))
 
             #print("VOICE RECOGNITION STOPPED")
-            return
         print("VOICEREC: Stopped")
-    except Exception:
-        raise Exception("VOICEREC: Could not initialize")
-    
+    except Exception as e:
+        print(f"VOICEREC: Exception {str(e)}")
+
+@threaded
+def VoiceRecognizer(elevator)
+    print("VOICEREC: Initializing")
+    asyncio.run(loop_voice_input(elevator))

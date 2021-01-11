@@ -57,6 +57,17 @@ def listen_to_cabin():
         except Exception as e:
             print(f"EXCEPTION IN Listen_to_cabin {str(e)}")
 
+def exit():
+    print("STOP BLINK")
+    led.stop_blink()
+    print("CLEANING GPIOs")
+    GPIO.cleanup()
+    print('Interrupted')
+    try:
+        sys.exit(0)
+    except SystemExit:
+        os._exit(0)
+
 if __name__ == "__main__":
     print("Lora [OK]")
     try:
@@ -76,5 +87,7 @@ if __name__ == "__main__":
             time.sleep(1)
 
     except Exception as e:
-        print("CLEANING GPIOs")
-        GPIO.cleanup()
+        exit()
+    except KeyboardInterrupt:
+        exit()
+    

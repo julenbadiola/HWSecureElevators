@@ -6,7 +6,7 @@ import asyncio
 
 from logic.CapacityController import get_current_occupation
 from logic.VoiceAssistant import VoiceAssistant
-from logic.VoiceRecognition import wait_voice_input, check_floor_and_ride
+from logic.VoiceRecognition import VoiceRecognizer
 from logic.ServerCommunication import ServerCommunication, DISABLED_FLOOR, CAPACITY_OVER, EXCEPTION
 from logic.VentilationManager import VentilationManager
 
@@ -33,11 +33,12 @@ class Elevator(metaclass=SingletonMeta):
     #Functionality
     calls_pool = []
     arrived_pool = []
-    
     calls_thread = None
     ride_thread = None
+
+    #Floor input
     waitingForInput = False
-    voice_recog_thread = None
+    voicerec_thread = None
     buttons_emulator = None
 
     voice_assistant = None
@@ -58,6 +59,7 @@ class Elevator(metaclass=SingletonMeta):
 
             self.calls_thread = self.thread_check_calls()
             self.voice_assistant = VoiceAssistant(self)
+            self.voicerec_thread = VoiceRecognizer(self)
             self.ventilation_manager = VentilationManager(self)
             self.code = properties.ELEVATOR_CODE
             self.lora = lora
@@ -110,8 +112,9 @@ class Elevator(metaclass=SingletonMeta):
             time.sleep(1)
             if not self.riding and len(self.calls_pool) > 0:
                 call = self.calls_pool[0]
-                if call is not None:
-                    self.ride(False, call)
+                if call:
+                    self.ride(False, call["floor"], call["calltime"])
+                    self.calls_pool.remove(call)
 
     #BUSINESS LOGIC
     def call(self, where):
@@ -131,31 +134,13 @@ class Elevator(metaclass=SingletonMeta):
             print(f"PRESSED BUTTON, GOING TO {floor}")
             self.ride(True, floor)
 
-    def wait_for_floor_input(self):
-        #Matamos los hilos input si existen
-        self.voice_recog_thread = kill_thread(self.voice_recog_thread)
-        #Activamos el reconocimiento por voz
-        self.waitingForInput = True
-        if self.voice_control_active:
-            self.voice_recog_thread = self.thread_voice_recognition_floor_input()
-
-    @threaded
-    def thread_voice_recognition_floor_input(self):
-        try:
-            asyncio.run(wait_voice_input(check_floor_and_ride))
-        except Exception as e:
-            #ServerCommunication().send_incidence_data(EXCEPTION, str(e))
-            self.voice_assistant.add_to_pool("El reconocimiento de voz no pudo ser inicializado")
-        
-    def ride(self, destination, call):
+    def ride(self, destination, floorToGo, calltime=None):
         self.waitingForInput = False
-        self.voice_recog_thread = kill_thread(self.voice_recog_thread)
-        self.ride_thread = self.thread_ride(destination, call)
+        self.ride_thread = self.thread_ride(destination, floorToGo, calltime)
 
     @threaded
-    def thread_ride(self, destination, call):
+    def thread_ride(self, destination, floorToGo, calltime):
         start = time.time()
-        floorToGo = call["floor"]
         if floorToGo == None:
             return
         
@@ -189,24 +174,21 @@ class Elevator(metaclass=SingletonMeta):
             if not destination:
                 self.voice_assistant.add_to_pool('Pronuncie el piso al que desea ir.')
                 time.sleep(8)
-            self.wait_for_floor_input()
+            
+            self.waitingForInput = True
             
         print(f"ELEV: Ride to {floorToGo} finished.")
         finishTime = time.time()
         self.last_ride_time = finishTime
         #Send data about the call to the server
         try:
-            delayedTime = finishTime - call["calltime"]
-            ServerCommunication().send_call_data(floorToGo, delayedTime)
+            if calltime:
+                delayedTime = finishTime - calltime
+                ServerCommunication().send_call_data(floorToGo, delayedTime)
         except Exception as e:
             print(e)
             
-        try:
-            self.add_pool_arrived_lora(floorToGo)
-            self.calls_pool.remove(call)
-        except Exception as e:
-            #Si tira error es porque no es un call, el ride se ha activado desde el recog o los botones
-            pass
+        self.add_pool_arrived_lora(floorToGo)
         
         #Esperamos al llegar por si entra alguien después del que sale y acciona el input
         time.sleep(30)
