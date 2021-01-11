@@ -30,15 +30,17 @@ def thread_listen_to_floors():
 
 if __name__ == "__main__":
     print("==================== SERVER SECURE ELEVATORS ===================== \n")
-    
-    #Initializing
-    elevator.call(0)
-    thread_listen_to_floors()
-    if elevator.capacity_control_active:
-        print("FUNC: Capacity control functionality is active.")
-        initialize_capacity_controller()
-    else:
-        print("FUNC: Capacity control functionality is INACTIVE.")
+    try:
+        #Initializing
+        elevator.call(0)
+        thread_listen_to_floors()
+        if elevator.capacity_control_active:
+            print("FUNC: Capacity control functionality is active.")
+            initialize_capacity_controller()
+        else:
+            print("FUNC: Capacity control functionality is INACTIVE.")
 
-
+    except Exception as e:
+        print("CLEANING GPIOs")
+        GPIO.cleanup()
 

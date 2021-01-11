@@ -37,24 +37,24 @@ class LED(object):
                 time.sleep(1)
  
 class Button(object):
+    button = None
     pressed = False
     pin = None
     callback = None
 
-    def __init__(self, pin, _callback = None):
+    def __init__(self, PIN, _callback = None):
         # High = pressed
-        self.button = grovepi.pinMode(pin,"INPUT")
-        self.pin = pin
+        self.button = GPIO(PIN, GPIO.IN)
+        self.pin = PIN
         self.callback = _callback
         self.thread_button()
     
     @threaded
     def thread_button(self):
         while True:
-            time.sleep(.5)
-            if grovepi.digitalRead(self.pin):
+            time.sleep(1)
+            if self.button.read():
                 if not self.pressed:
-                    print(f"BUTTON {self.pin} PRESSED")
                     self.pressed = True
                     if self.callback:
                         self.callback()
