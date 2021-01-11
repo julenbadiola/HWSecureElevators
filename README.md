@@ -44,22 +44,24 @@ Idealmente, se debería implantar una raspberry en la cabina del elevador y que 
 
 En el caso del **MP**:
 
-| Elemento | Puerto de conexión |
-| --- | --- |
-| SX1278 433MHz LoRa Module | Puerto serial |
-| LEDs | GPIO 24 |
-| Sensor de proximidad | GPIO 5 |
-| Botones | GPIO 16 |
+| Elemento | Puerto de conexión | Utilidad |
+| --- | --- | --- |
+| SX1278 433MHz LoRa Module | Puerto serial | Comunicación entre módulos
+| Botón | GPIO 16 | Accionar el mecanismo de llamada al ascensor
+| Sensor de proximidad | GPIO 5 | Accionar el mecanismo de llamada al ascensor sin necesidad de contacto con superficies
+| LED | GPIO 24 | Proporcionar feedback al usuario cuando acciona la llamada al ascensor (parpadea)
+
 
 
 En el caso del **MC**:
 
-| Elemento | Puerto de conexión |
-| --- | --- |
-| SX1278 433MHz LoRa Module | Puerto serial |
-| Webcam | USB |
-| Micrófono | Integrado en la webcam, USB |
-| Altavoz | Jack 3.5mm o Bluetooth |
+| Elemento | Puerto de conexión | Utilidad |
+| --- | --- | --- |
+| SX1278 433MHz LoRa Module | Puerto serial | Comunicación entre módulos
+| Webcam | USB | Control de aforo mediante reconocimiento de imágenes
+| Micrófono | Integrado en la webcam, USB | Control del ascensor mediante comandos de voz
+| Altavoz | Jack 3.5mm o Bluetooth | El asistente de voz del ascensor proporciona feedback al usuario
+| Botón | GPIO 16 | Emular los botones físicos del ascensor para seleccionar un piso
 
 ## Descripción de la jerarquía de ficheros (software)
 1. **/logic**: Directorio que contiene las clases de la lógica de negocio.

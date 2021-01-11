@@ -2,7 +2,6 @@ import sys
 import RPi.GPIO as GPIO
 from func.threading import threaded
 import time
-import grovepi
 
 usleep = lambda x: time.sleep(x / 1000000.0)
  
