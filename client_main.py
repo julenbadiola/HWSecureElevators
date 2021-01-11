@@ -71,6 +71,7 @@ if __name__ == "__main__":
 
             except Exception as e:
                 print(f"EXCEPTION IN thread_main {str(e)}")
+                break
 
             time.sleep(1)
 

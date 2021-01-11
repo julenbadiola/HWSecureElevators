@@ -188,7 +188,7 @@ class Elevator(metaclass=SingletonMeta):
             #If this floor is the destination, dont say: where do you want to go?
             if not destination:
                 self.voice_assistant.add_to_pool('Pronuncie el piso al que desea ir.')
-                time.sleep(2)
+                time.sleep(8)
             self.wait_for_floor_input()
             
         print(f"ELEV: Ride to {floorToGo} finished.")

@@ -64,6 +64,7 @@ async def wait_voice_input(_callback = None):
         with sr.Microphone(device_index=2) as source:
             while True: 
                 try:
+                    print("RECONOCIENDO...")
                     audio = r.listen(source)
                     text = r.recognize_google(audio, language="es-ES")
                     print(text.lower())
@@ -74,7 +75,7 @@ async def wait_voice_input(_callback = None):
                                 break
 
                 except Exception as e:
-                    print(e)
+                    print("VOICEREC EXCEPTION ", str(e))
 
             #print("VOICE RECOGNITION STOPPED")
             return
