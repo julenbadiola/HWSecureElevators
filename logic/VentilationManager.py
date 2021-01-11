@@ -8,7 +8,7 @@ class VentilationManager(metaclass=SingletonMeta):
     elevator = None
 
     def __init__(self, elevator):
-        self.main_thread = thread_main()
+        self.main_thread = self.thread_main()
         self.elevator = elevator
 
     @property

@@ -24,7 +24,8 @@ class LED(object):
  
     def stop_blink(self):
         self.blinking = False
- 
+        self.led.write(0)
+
     @threaded
     def thread_blink(self):
         while True:
@@ -49,6 +50,7 @@ class GroveButton(object):
  
     @property
     def on_press(self):
+        print("PRESSED BUTTON")
         self.pressed = True
         return self.__on_press
 
@@ -60,6 +62,7 @@ class GroveButton(object):
  
     @property
     def on_release(self):
+        print("RELEASED BUTTON")
         self.pressed = False
         return self.__on_release
  
