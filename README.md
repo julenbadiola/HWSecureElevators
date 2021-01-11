@@ -131,7 +131,7 @@ chmod +x setupClient.sh
 ## Vídeo demostración
 **Como nosotros disponemos de 2 raspberrys, una toma el rol de cabina y la otra de planta.** 
 
-![This is a alt text.](/image/sample.png "This is a sample image.")
+[![Demo video](https://img.youtube.com/vi/lIBlGJ64l38/0.jpg)](https://www.youtube.com/watch?v=lIBlGJ64l38)
 
 ## Links y referencias
 
