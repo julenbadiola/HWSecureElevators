@@ -53,7 +53,7 @@ async def loop_voice_input(elevator):
             while True: 
                 if elevator.waitingForInput:
                     try:
-                        print("RECONOCIENDO...")
+                        print("VOICEREC: recognizing...")
                         audio = r.listen(source)
                         text = r.recognize_google(audio, language="es-ES")
                         print(text.lower())
@@ -65,13 +65,17 @@ async def loop_voice_input(elevator):
 
                     except Exception as e:
                         print("VOICEREC controlled exception: ", str(e))
-
+                time.sleep(1)
             #print("VOICE RECOGNITION STOPPED")
         print("VOICEREC: Stopped")
     except Exception as e:
         print(f"VOICEREC: Exception {str(e)}")
 
 @threaded
-def VoiceRecognizer(elevator)
+def VoiceRecognizer(elevator):
     print("VOICEREC: Initializing")
-    asyncio.run(loop_voice_input(elevator))
+    fails = 0
+    while fails < 3:
+        asyncio.run(loop_voice_input(elevator))
+        print("VOICEREC: Restarting after fail")
+        fails += 1

@@ -1,6 +1,7 @@
 import json
 from time import sleep
 from lora.lora import LoraEndpoint
+from grove.gpio import GPIO
 
 from properties.properties import PropertiesManager
 from logic.Elevator import Elevator

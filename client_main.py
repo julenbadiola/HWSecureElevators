@@ -6,6 +6,7 @@ from func import protocol as prot
 from func.threading import threaded
 from func.sensors import LED, GroveUltrasonicRanger, Button
 from properties.properties import PropertiesManager
+import RPi.GPIO as GPIO
 
 properties = PropertiesManager()
 lora_endpoint = LoraEndpoint()

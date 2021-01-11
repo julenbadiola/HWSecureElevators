@@ -18,7 +18,6 @@ from cached_property import cached_property
 
 class Elevator(metaclass=SingletonMeta):
     #Static
-    code = None
     id = None
     config = None
     functionalities = []
@@ -61,7 +60,6 @@ class Elevator(metaclass=SingletonMeta):
             self.voice_assistant = VoiceAssistant(self)
             self.voicerec_thread = VoiceRecognizer(self)
             self.ventilation_manager = VentilationManager(self)
-            self.code = properties.ELEVATOR_CODE
             self.lora = lora
 
             ServerCommunication().set_active(self.data_retrieve_active)
@@ -105,17 +103,6 @@ class Elevator(metaclass=SingletonMeta):
     def voice_control_active(self):
         return "voicecontrol" in self.functionalities
 
-    @threaded
-    def thread_check_calls(self):
-        #Checks calls pool and sends to ride if the elevator is not riding already
-        while True:
-            time.sleep(1)
-            if not self.riding and len(self.calls_pool) > 0:
-                call = self.calls_pool[0]
-                if call:
-                    self.ride(False, call["floor"], call["calltime"])
-                    self.calls_pool.remove(call)
-
     #BUSINESS LOGIC
     def call(self, where):
         if(self.valid_floor_selection(False, where)):
@@ -127,6 +114,17 @@ class Elevator(metaclass=SingletonMeta):
         else:
             print(f"ELEV: Elevator called in inactive floor {where}")
     
+    @threaded
+    def thread_check_calls(self):
+        #Checks calls pool and sends to ride if the elevator is not riding already
+        while True:
+            time.sleep(1)
+            if len(self.calls_pool) > 0:
+                call = self.calls_pool[0]
+                if call and not self.riding:
+                    self.ride(False, call["floor"], call["calltime"])
+                    self.calls_pool.remove(call)
+
     def physic_button_floor_input(self, t=None):
         print(f"ELEV: Botón pulsado")
         if self.waitingForInput:
@@ -135,7 +133,9 @@ class Elevator(metaclass=SingletonMeta):
             self.ride(True, floor)
 
     def ride(self, destination, floorToGo, calltime=None):
-        self.waitingForInput = False
+        if self.waitingForInput:
+            #Matamos el ride si existe
+            kill_thread(self.ride_thread)
         self.ride_thread = self.thread_ride(destination, floorToGo, calltime)
 
     @threaded
