@@ -131,7 +131,7 @@ chmod +x setupClient.sh
 ## Vídeo demostración
 **Como nosotros disponemos de 2 raspberrys, una toma el rol de cabina y la otra de planta.** 
 
-[![Demo video](https://img.youtube.com/vi/lIBlGJ64l38/0.jpg)](https://www.youtube.com/watch?v=lIBlGJ64l38)
+[![VIDEO](https://img.youtube.com/vi/lIBlGJ64l38/0.jpg)](https://www.youtube.com/watch?v=lIBlGJ64l38)
 
 ## Links y referencias
 
@@ -145,6 +145,12 @@ Github repo: [PeopleCounter by LukashenkoEvegeniy](https://github.com/Lukashenko
 
 
 ## Problemas generados y soluciones adoptadas
-1. **raspberry muerta**
-1. **sd muerta**
+Durante el desarrollo del proyecto nos hemos encontrado con ciertos problemas referentes al hardware; entre estos, destacan sobre los demás la pérdida de una de las sd y una raspberry que dejó de funcionar.
+
+1. Tras una caída de tensión en casa, una de las sd se fundió. La solución fue sencilla: cogimos otra sd que teníamos por casa y volvimos a configurarlo desde cero.
+
+1. Una de las raspberrys dejó de funcionar estrepitosamente, dejó de bootear la sd (que por suerte no sufrió daños). Tuvimos la suerte de tener el mismo modelo en casa y no tardamos en ponerla otra vez a funcionar.
+
+1. El micrófono de la webcam de la que disponemos no es de gran calidad, por lo que el testeo del reconocimiento de voz ha sido un sufrimiento y, como se puede ver en el vídeo demo, falla repetidamente. 
+
 
