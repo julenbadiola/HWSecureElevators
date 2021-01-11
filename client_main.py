@@ -4,14 +4,14 @@ import signal
 from lora.lora import LoraEndpoint
 from func import protocol as prot
 from func.threading import threaded
-from func.sensors import LED, GroveUltrasonicRanger, Button
+from func.sensors import LED, GroveUltrasonicRanger, GroveButton
 from properties.properties import PropertiesManager
 
 properties = PropertiesManager()
 lora_endpoint = LoraEndpoint()
 #SENSORS
 led = LED(properties.LED_PIN)
-but = Button(properties.BUTTON_PIN)
+but = GroveButton(properties.BUTTON_PIN)
 prox = GroveUltrasonicRanger(properties.PROXIMITY_PIN)
 
 def timeout_handler(signum, frame):
@@ -59,13 +59,14 @@ def listen_to_cabin():
 
 if __name__ == "__main__":
     print("Lora [OK]")
+    but.on_press = call_elevator
     while True:
         try:
             # Emulador botón físico
             # TODO: if sensor proximidad detecta algo o el boton es presionado => call_elevator
             dist = prox.get_distance()
             print(f"DISTANCE: {dist}")
-            if but.is_pressed() or dist < 2:
+            if dist < 2:
                 call_elevator()
 
         except Exception as e:

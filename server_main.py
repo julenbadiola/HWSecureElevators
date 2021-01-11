@@ -7,10 +7,11 @@ from logic.Elevator import Elevator
 from logic.CapacityController import initialize as initialize_capacity_controller
 from func.threading import threaded
 from func import protocol
+from func.sensors import GroveButton
 
 properties = PropertiesManager()
 lora = LoraEndpoint()
-buttonsEmulator = Button(properties.BUTTON_PIN)
+buttonsEmulator = GroveButton(properties.BUTTON_PIN)
 elevator = Elevator(properties, lora, buttonsEmulator)
 
 @threaded

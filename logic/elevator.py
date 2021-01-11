@@ -34,8 +34,8 @@ class Elevator(metaclass=SingletonMeta):
     
     calls_thread = None
     ride_thread = None
+    waitingForInput = False
     voice_recog_thread = None
-    physic_button_thread = None
     buttons_emulator = None
 
     #INITIALIZATION
@@ -44,6 +44,8 @@ class Elevator(metaclass=SingletonMeta):
         #Get configuration from backend or file
         config = properties.get_elevator_configuration()
         self.buttons_emulator = buttonsEmulator
+        self.buttons_emulator.on_press = self.physic_button_floor_input
+        
         try:
             self.id = json.loads(config['DEFAULT']['ID'])
             self.functionalities = json.loads(config['DEFAULT']['FUNCTIONALITIES'])
@@ -116,31 +118,20 @@ class Elevator(metaclass=SingletonMeta):
                 })
         else:
             print(f"ELEV: Elevator called in inactive floor {where}")
-
-    def kill_floor_input_threads(self):
-        self.voice_recog_thread = kill_thread(self.voice_recog_thread)
-        self.physic_button_thread = kill_thread(self.physic_button_thread)
+    
+    def physic_button_floor_input(self):
+        if self.waitingForInput:
+            floor = random.randint(0,len(self.floors))
+            print(f"PRESSED BUTTON, GOING TO {floor}")
+            self.ride(True, floor)
 
     def wait_for_floor_input(self):
         #Matamos los hilos input si existen
-        self.kill_floor_input_threads()
+        self.voice_recog_thread = kill_thread(self.voice_recog_thread)
         #Activamos el reconocimiento por voz
+        self.waitingForInput = True
         if self.voice_control_active:
             self.voice_recog_thread = self.thread_voice_recognition_floor_input()
-        #Activamos los botones (emulados por teclado)
-        self.physic_button_thread = self.thread_physic_button_floor_input()
-
-    @threaded
-    def thread_physic_button_floor_input(self):
-        while True:
-            if self.buttons_emulator.is_pressed():
-                print("PRESSED BUTTON")
-                done = False
-                while not done:
-                    floor = random.randint(0,len(self.floors))
-                    if floor != self.where:
-                        print(f"PRESSED BUTTON, GOING TO {floor}")
-                        self.ride(True, floor)
 
     @threaded
     def thread_voice_recognition_floor_input(self):
@@ -151,8 +142,9 @@ class Elevator(metaclass=SingletonMeta):
             self.voice_assistant.add_to_pool("Voice recognition could not be initialized.")
         
     def ride(self, destination, call):
+        self.waitingForInput = False
+        self.voice_recog_thread = kill_thread(self.voice_recog_thread)
         self.ride_thread = self.thread_ride(destination, call)
-        self.kill_floor_input_threads()
 
     @threaded
     def thread_ride(self, destination, call):
@@ -207,6 +199,9 @@ class Elevator(metaclass=SingletonMeta):
         except Exception as e:
             #Si tira error es porque no es un call, el ride se ha activado desde el recog o los botones
             pass
+        
+        #Esperamos al llegar por si entra alguien después del que sale y acciona el input
+        time.sleep(10)
     
     ## OTHERS
     def valid_floor_selection(self, voice, floor):

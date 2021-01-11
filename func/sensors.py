@@ -2,6 +2,8 @@ import sys
 from grove.gpio import GPIO
 from func.threading import threaded
 import time
+from grove.button import Button
+from grove.factory import Factory
  
 usleep = lambda x: time.sleep(x / 1000000.0)
  
@@ -34,16 +36,45 @@ class LED(object):
             else:
                 time.sleep(1)
  
-class Button(object):
-    button = None
-    pin = None
+class GroveButton(object):
+    def __init__(self, pin):
+        # High = pressed
+        self.__btn = Factory.getButton("GPIO-HIGH", pin)
+        self.__last_time = time.time()
+        self.__on_press = None
+        self.__on_release = None
+        self.__btn.on_event(self, GroveButton.__handle_event)
  
-    def __init__(self, PIN):
-        self.pin = PIN
-        self.button = GPIO(PIN, GPIO.IN)
+    @property
+    def on_press(self):
+        return self.__on_press
 
-    def is_pressed(self):
-        return self.button.read() == 1
+    @on_press.setter
+    def on_press(self, callback):
+        if not callable(callback):
+            return
+        self.__on_press = callback
+ 
+    @property
+    def on_release(self):
+        return self.__on_release
+ 
+    @on_release.setter
+    def on_release(self, callback):
+        if not callable(callback):
+            return
+        self.__on_release = callback
+ 
+    def __handle_event(self, evt):
+        dt, self.__last_time = evt["time"] - self.__last_time, evt["time"]
+        # print("event index:{} event:{} pressed:{}".format(evt["index"], evt["code"], evt["pressed"]))
+        if evt["code"] == Button.EV_LEVEL_CHANGED:
+            if evt["pressed"]:
+                if callable(self.__on_press):
+                    self.__on_press(dt)
+            else:
+                if callable(self.__on_release):
+                    self.__on_release(dt)
 
 class GroveUltrasonicRanger(object):
     def __init__(self, pin):
