@@ -28,7 +28,6 @@ class VoiceAssistant(metaclass=SingletonMeta):
                 tosay = self.pool[0]
                 if tosay:
                     #print(f"VOICEASSIST: Saying {tosay}")
-                    os.system(f'pico2wave -w temp.wav "{tosay}" && aplay temp.wav > /dev/null 2>&1')
-                    #os.system(f'pico2wave -l es-ES -w temp.wav "{tosay}"')
-                    #pico2wave -l es-ES -w temp.wav \"Hola mundo!!\"
+                    #El "ei" es porque si no, no se reproduce bien
+                    os.system(f'pico2wave -l es-ES -w temp.wav "ei. {tosay}" && aplay temp.wav > /dev/null 2>&1')
                     del self.pool[0]

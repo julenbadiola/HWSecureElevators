@@ -124,7 +124,7 @@ class Elevator(metaclass=SingletonMeta):
         else:
             print(f"ELEV: Elevator called in inactive floor {where}")
     
-    def physic_button_floor_input(self):
+    def physic_button_floor_input(self, t=None):
         print(f"ELEV: Botón pulsado")
         if self.waitingForInput:
             floor = random.randint(0,len(self.floors))
@@ -145,7 +145,7 @@ class Elevator(metaclass=SingletonMeta):
             asyncio.run(wait_voice_input(check_floor_and_ride))
         except Exception as e:
             #ServerCommunication().send_incidence_data(EXCEPTION, str(e))
-            self.voice_assistant.add_to_pool("Voice recognition could not be initialized.")
+            self.voice_assistant.add_to_pool("El reconocimiento de voz no pudo ser inicializado")
         
     def ride(self, destination, call):
         self.waitingForInput = False
@@ -162,7 +162,7 @@ class Elevator(metaclass=SingletonMeta):
         occupation = get_current_occupation()
         if self.capacity < occupation:
             print(f"ELEV: The capacity is higher than maximum {self.capacity}.")
-            self.voice_assistant.add_to_pool(f"The current occupation is higher than maximum of {self.capacity}.")
+            self.voice_assistant.add_to_pool(f"La ocupación actual de {occupation} es superior a la máxima de {self.capacity}.")
             ServerCommunication().send_incidence_data(CAPACITY_OVER, f"{occupation}/{self.capacity}")
 
         elif not self.valid_floor_selection(False, floorToGo):
@@ -187,7 +187,7 @@ class Elevator(metaclass=SingletonMeta):
 
             #If this floor is the destination, dont say: where do you want to go?
             if not destination:
-                self.voice_assistant.add_to_pool('Speak the floor you want to go.')
+                self.voice_assistant.add_to_pool('Pronuncie el piso al que desea ir.')
                 time.sleep(2)
             self.wait_for_floor_input()
             
@@ -221,19 +221,19 @@ class Elevator(metaclass=SingletonMeta):
             return True
         else:
             if voice:
-                self.voice_assistant.add_to_pool(f"The floor {floor} is disabled")
+                self.voice_assistant.add_to_pool(f"El piso {floor} es inaccesible.")
             return False
 
     def add_to_voice_assistant(self, tosay):
         self.voice_assistant.add_to_pool(tosay)
 
     def open_doors(self):
-        self.voice_assistant.add_to_pool("Opening cabin")
+        self.voice_assistant.add_to_pool("Abriendo cabina.")
         time.sleep(2)
         self.doors_open = True
     
     def close_doors(self):
-        self.voice_assistant.add_to_pool("Closing cabin")
+        self.voice_assistant.add_to_pool("Cerrando cabina.")
         time.sleep(2)
         self.doors_open = False
 

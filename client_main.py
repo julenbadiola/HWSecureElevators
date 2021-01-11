@@ -17,7 +17,7 @@ prox = GroveUltrasonicRanger(properties.PROXIMITY_PIN)
 def timeout_handler(signum, frame):
     raise Exception("timeout reached")
 
-def call_elevator():
+def call_elevator(t=None):
     data = {
         prot.ELEVATOR_CALL: properties.THIS_FLOOR,
     }

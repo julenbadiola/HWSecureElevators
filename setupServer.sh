@@ -1,4 +1,7 @@
 #!/bin/bash
+#Grove dependencies
+curl -sL https://github.com/Seeed-Studio/grove.py/raw/master/install.sh | sudo bash -s -
+
 #Dependencies for voice assistant
 wget http://ftp.us.debian.org/debian/pool/non-free/s/svox/libttspico0_1.0+git20130326-9_armhf.deb
 wget http://ftp.us.debian.org/debian/pool/non-free/s/svox/libttspico-utils_1.0+git20130326-9_armhf.deb
