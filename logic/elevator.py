@@ -38,6 +38,7 @@ class Elevator(metaclass=SingletonMeta):
     voice_recog_thread = None
     buttons_emulator = None
 
+    last_ride_time = None
     #INITIALIZATION
     def __init__(self, properties, lora, buttonsEmulator):
         print(f"ELEV: Initializing elevator")
@@ -186,9 +187,11 @@ class Elevator(metaclass=SingletonMeta):
             self.wait_for_floor_input()
             
         print(f"ELEV: Ride to {floorToGo} finished.")
+        finishTime = time.time()
+        self.last_ride_time = finishTime
         #Send data about the call to the server
         try:
-            delayedTime = call["calltime"] - time.time()
+            delayedTime = finishTime - call["calltime"]
             ServerCommunication().send_call_data(floorToGo, delayedTime)
         except Exception as e:
             print(e)

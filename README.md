@@ -1,43 +1,66 @@
 # Secure Elevators
 ## Introducción
-El objetivo de este proyecto es hacer de los ascensores un espacio seguro donde se pueda evitar el contacto con superficies y la ventilación estuviese asegurada, evitando así posibles infecciones por viruses como el SARS-CoV-2. Además, permite el control de aforo dentro del habitáculo haciendo uso del reconocimiento de imágenes y el control del elevador mediante comandos de voz.
+El objetivo de este proyecto es hacer de los elevadores un espacio seguro donde se pueda evitar el contacto con superficies y la ventilación estuviese asegurada, evitando así posibles infecciones por viruses como el SARS-CoV-2. Además, permite el control de aforo dentro del habitáculo haciendo uso del reconocimiento de imágenes y el control del elevador mediante comandos de voz.
 
 El programa recopila información útil sobre el uso del elevador y la envía al servidor central, desarrollado por Julen Badiola haciendo uso del stack MERN (Mongo, Express, React y NodeJs) como proyecto para la asignatura Desarrollo Avanzado de Software. Además, el programa python adoptará las funcionalidades que el usuario haya activado en la interfaz web.
 
 
 > La URL del servidor es: https://secureelevatorsdemo.herokuapp.com
 
+## Descripción general
+> Se referenciará al módulo de cabina como MC y al módulo de planta como MP.
+### Módulo planta
+
+Este módulo es representado por el fichero `client_main.py`. El objetivo es detectar cuando alguien llama al elevador. Para ello, se hace uso de dos sensores:
+
+1. **Sensor de proximididad**: si la distancia capturada por el sensor es inferior a 2.
+1. **Grove Button**: cuando el botón es presionado.
+
+
+### Módulo cabina
+
+Este módulo es representado por el fichero `server_main.py`. Es el programa principal, ya que en él es donde ocurren todas las funcionalidades principales del proyecto:
+
+* **Obtención de propiedades**: Las propiedades principales se obtienen del fichero de configuración llamado `main.properties`. En él, se definen algunas constantes de las que hará uso el programa. La clase encargada de obtener dichas propiedades se llama `PropertiesManager`, y está ubicada en el archivo `/properties/properties.py`.
+
+* **Obtención de configuración**: Al iniciar el script, se obtiene la configuración del elevador mediante una llamada a la API del servidor. Una vez obtenida, se almacena en el fichero `elevator.properties`.
+
+* **Funcionalidad del elevador**: El elevador está representado por un objeto tipo `Elevator`. En él, se especifica el comportamiento del ascensor como llamadas, viajes, reconocimientos, captura de datos...
+
+* **Recepción de llamadas al ascensor**: Recibe e interpreta los datos enviados desde los MP y acciona el mencionado objeto `Elevator` en función de dichos datos.
+
+* **Reconocimiento de imágenes**: Las imágenes se obtienen en tiempo real desde la webcam. Genera a partir del primer frame obtenido (idealmente el elevador vacío) una imagen que se utilizará para contrastar con las siguientes. Es decir, si el cambio entre el primer frame (elevador vacío) y el frame actual (con 2 personas, por ejemplo) es notable, detectará el número de personas que hay dentro.
+
+* **Reconocimiento de voz**: Hace uso de la API de Google Speech para reconocer el piso al que quiere ir el usuario. La palabra clave es "piso", por lo que cualquier conbinación que contenga dicha palabra accionará el mecanismo de viaje hacia el piso seleccionado:
+    * *"Llévame al piso 1"*
+    * *"Llévame al primer piso"*
+    * *"piso 1"*
+
+
+
 ## Descripción componentes hardware
-La idea principal consiste en que se implante una raspberry en la cabina del ascensor y que adopte el rol de "módulo de cabina". Por el otro lado, una raspberry por cada planta y que adopte el rol "módulo de planta".
-
-Como nosotros disponemos de 2 raspberrys, por lo que una toma el rol de cabina y la otra de planta.
-
-> A partir de ahora, módulo de cabina se sustituirá por MC y módulo de planta por MP.
+Idealmente, se debería implantar una raspberry en la cabina del elevador y que adopte el rol de "módulo de cabina" y, por el otro lado, una raspberry por cada planta y que adopte el rol "módulo de planta".
 
 En el caso del **MP**:
 
 | Elemento | Puerto de conexión |
 | --- | --- |
-| SX1278 433MHz LoRa Module | USB |
-| LEDs | Enumera todos los archivos nuevos o modificados |
-| Sensor de proximidad | Muestra las diferencias de archivo que no han sido preparadas |
-| Botones | Muestra las diferencias de archivo que no han sido preparadas |
+| SX1278 433MHz LoRa Module | Puerto serial |
+| LEDs | GPIO 24 |
+| Sensor de proximidad | GPIO 5 |
+| Botones | GPIO 16 |
 
 
 En el caso del **MC**:
 
 | Elemento | Puerto de conexión |
 | --- | --- |
-| SX1278 433MHz LoRa Module | USB |
+| SX1278 433MHz LoRa Module | Puerto serial |
 | Webcam | USB |
-| Micrófono | Integrado en la webcam, de modo que USB |
+| Micrófono | Integrado en la webcam, USB |
 | Altavoz | Jack 3.5mm o Bluetooth |
 
-
-## Descripción software
-Para ello, el programa, escrito en Python3, es ejecutado sobre una serie de raspberry pi (3b). Una de ellas adopta el rol de "Cabina", mientras que las demás son "Plantas". 
-
-### Descripción de la jerarquía de ficheros
+## Descripción de la jerarquía de ficheros (software)
 1. **/logic**: Directorio que contiene las clases de la lógica de negocio.
     
     1. **Elevator.py**: Clase singleton que representa la cabina del elevador. En ella ocurren los procesos de llamada, viaje, solicitud de piso...
@@ -64,24 +87,25 @@ Para ello, el programa, escrito en Python3, es ejecutado sobre una serie de rasp
 1. **setupClient.sh**: fichero de instalación de dependencias necesarias para el `client_main.py`
 1. **setupServer.sh**: fichero de instalación de dependencias necesarias para el `server_main.py`
 
-### Módulo planta
 
-El objetivo de los módulos de planta es detectar cuando alguien llama al ascensor haciendo uso de un sensor de proximidad.
+## Comunicación entre módulos (lora)
+#### Llamadas al elevador
+Para llamar al elevador desde el MP, se envía mediante lora la siguiente información:
+```
+data = {
+    prot.ELEVATOR_CALL: properties.THIS_FLOOR,
+}
+```
+El MC comprueba los datos provenientes del módulo de lora, y si existe una petición `ELEVATOR_CALL`, activa la llamada en el objeto local tipo `Elevator`.
 
-### Módulo cabina
-
-Este módulo es representado por el fichero `server_main.py`. Es el programa principal, ya que en él es donde ocurren todas las funcionalidades principales del proyecto:
-
-* **Obtención de propiedades**: Las propiedades principales se obtienen del fichero de configuración llamado `main.properties`. En él, se definen algunas constantes de las que hará uso el programa. La clase encargada de obtener dichas propiedades se llama `PropertiesManager`, y está ubicada en el archivo `/properties/properties.py`
-
-* **Obtención de configuración**: Al iniciar el script, se obtiene la configuración del elevador mediante una llamada a la API. Una vez obtenida, se almacena en el fichero `elevator.properties`
-
-* **Funcionalidad del ascensor**: Al iniciar el script, se crea un hilo en el que se espera a recibir datos provenientes de la red lora creada. Estos datos sólo son de un tipo, 
-
-* Funcionalidad del ascensor:
-
-
-
+#### Llegadas del elevador
+Cada vez que el MC llega a un piso, envía por lora la siguiente información:
+```
+data = {
+    prot.ELEVATOR_ARRIVE: floorArrived,
+}
+```
+El objetivo de este intercambio de información es que el MP desactive el parpadeo del LED (que se ha activado al realizar la llamada al ascensor) si el elevador a llegado a la planta que representa.
 
 ## Instalación y puesta en marcha
 ### Módulo de cabina
@@ -90,16 +114,17 @@ Este módulo es representado por el fichero `server_main.py`. Es el programa pri
 chmod +x setupServer.sh
 ./setupServer.sh
 ```
-##### Ejecución: `python3 server_main.sh`
+##### Ejecución: `python3 server_main.py`
 ### Módulo de planta
 
 ```
 chmod +x setupClient.sh
 ./setupClient.sh
 ```
-##### Ejecución: `python3 client_main.sh`
+##### Ejecución: `python3 client_main.py`
 
 ## Vídeo demostración
+**Como nosotros disponemos de 2 raspberrys, una toma el rol de cabina y la otra de planta.** 
 
 ![This is a alt text.](/image/sample.png "This is a sample image.")
 
@@ -114,9 +139,8 @@ chmod +x setupClient.sh
 Github repo: [PeopleCounter by LukashenkoEvegeniy](https://github.com/LukashenkoEvgeniy/People-Counter/blob/master/PeopleCounterMain.py).
 
 
-## Problemas generados y soluciones
-1. **Se necesita leer y escribir en lora**: Solucion
-1. **Problema**: Solucion
-1. **VoiceAssistant en español**: Solucion
-1. **Calldata attended**: Solucion
+## Problemas generados y soluciones adoptadas
+1. **VoiceAssistant en español**: No hemos podido implementar el asistente de voz en castellano, por lo que hemos decidido que estuviera en inglés.
+1. **raspberry muerta**
+1. **sd muerta**
 
