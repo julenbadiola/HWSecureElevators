@@ -3,7 +3,7 @@ from func.Singleton import SingletonMeta
 from func.threading import threaded
 from logic.CapacityController import get_current_occupation
 
-class Ventilation(metaclass=SingletonMeta):
+class VentilationManager(metaclass=SingletonMeta):
     main_thread = None
     elevator = None
 

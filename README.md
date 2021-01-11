@@ -68,9 +68,10 @@ En el caso del **MC**:
     1. **VoiceAssistant.py**: Clase singleton que representa el asistente de voz. Hace uso de `pico2wave` para transformar texto en voz.
     1. **VoiceRecognition.py**: Fichero que alberga algunas funciones asíncronas (haciendo uso de `asyncio`) que transforman el habla en texto mediante llamadas a la API de Google Speech (lo hace internamente la librería `speech_recognition`).
     1. **CapacityController.py**: Alberga la funcionalidad de detección de personas en base a imágenes input. En nuestro caso, provenienen de la webcam.
+    1. **VentilationManager.py**: Alberga la clase singleton responsable de activa la ventilación en caso de que se cumplan ciertas condiciones, como que el tiempo de inactividad del elevador sea superior a 10 segundos.
     1. **/CapacityTestVideos**: Directorio que contiene dos vídeos para testear el funcionamiento del `CapacityController`. 
 1. **/func**: Directorio que contiene algunos métodos y clases genéricas.
-    1. **Singleton.py**: Metaclase de la que hacen uso todas las demás clases. Aplica el patrón de diseño con ese nombre que permite restringir la creación de objetos pertenecientes a una clase o el valor de un tipo a un único objeto.
+    1. **Singleton.py**: Metaclase de la que hacen uso algunas de las clases. Aplica el patrón de diseño con ese nombre que permite restringir la creación de objetos pertenecientes a una clase o el valor de un tipo a un único objeto.
     1. **threading.py**: Contiene la clase `Thread_with_trace` y algunas subrutinas para el manejo de hilos. El objetivo es poder parar determinados hilos que se crean durante la ejecución. Además, define la anotación `threading` para definir métodos (dentro de los propios objetos) que son ejecutados en un hilo concurrente.
     1. **sensors.py**: Fichero que alberga las clases referentes a los sensores LED, botones y sensor de proximidad en base a ultrasonidos.
     1. **numparser.py**: Funciones para detectar el piso al que quiere ir el usuario en base al texto que se ha detectado por su habla. 
@@ -78,9 +79,9 @@ En el caso del **MC**:
 1. **/lora**: Directorio que contiene lo referente a los módulos de Lora.
 
 1. **/properties**: Directorio que contiene lo referente al manejo de los archivos de configuración.
-    1. **elevator.properties**: Archivo de configuración del funcionamiento del elevador creado a partir de los datos obtenidos desde el servidor.
-    1. **main.properties**: Archivo de configuración general del proyecto.
     1. **properties.py**: Archivo que alberga la clase `PropertiesManager`, que hereda de Sigleton y que, como su propio nombre indica, es la encargada de manejar los archivos de configuración.
+    1. **main.properties**: Archivo de configuración general del proyecto. Es estático, nada en él cambia en ejecución.
+    1. **elevator.properties**: Al contrario que el anterior, este cambia a partir de los datos obtenidos desde el servidor. Define los pisos y funcionalidades que el usuario ha activado desde la interfaz web.
     
 1. **client_main.py**: script principal para la ejecución de los módulos de planta.
 1. **server_main.py**: script principal para la ejecución del  módulo de cabina.
@@ -99,13 +100,13 @@ data = {
 El MC comprueba los datos provenientes del módulo de lora, y si existe una petición `ELEVATOR_CALL`, activa la llamada en el objeto local tipo `Elevator`.
 
 #### Llegadas del elevador
-Cada vez que el MC llega a un piso, envía por lora la siguiente información:
+Cada vez que el elevador llega a un piso, el MC envía por lora la siguiente información:
 ```
 data = {
     prot.ELEVATOR_ARRIVE: floorArrived,
 }
 ```
-El objetivo de este intercambio de información es que el MP desactive el parpadeo del LED (que se ha activado al realizar la llamada al ascensor) si el elevador a llegado a la planta que representa.
+El objetivo de este intercambio de información es que el MP, al recibirlo, desactive el parpadeo del LED (que se ha activado al realizar la llamada al ascensor) si el elevador a llegado a la planta que representa.
 
 ## Instalación y puesta en marcha
 ### Módulo de cabina
@@ -140,7 +141,6 @@ Github repo: [PeopleCounter by LukashenkoEvegeniy](https://github.com/Lukashenko
 
 
 ## Problemas generados y soluciones adoptadas
-1. **VoiceAssistant en español**: No hemos podido implementar el asistente de voz en castellano, por lo que hemos decidido que estuviera en inglés.
 1. **raspberry muerta**
 1. **sd muerta**
 

@@ -8,6 +8,7 @@ from logic.CapacityController import get_current_occupation
 from logic.VoiceAssistant import VoiceAssistant
 from logic.VoiceRecognition import wait_voice_input, check_floor_and_ride
 from logic.ServerCommunication import ServerCommunication, DISABLED_FLOOR, CAPACITY_OVER, EXCEPTION
+from logic.VentilationManager import VentilationManager
 
 from func import protocol as prot
 from func.Singleton import SingletonMeta
@@ -38,13 +39,15 @@ class Elevator(metaclass=SingletonMeta):
     voice_recog_thread = None
     buttons_emulator = None
 
+    voice_assistant = None
+    ventilation_manager = None
     last_ride_time = None
     #INITIALIZATION
-    def __init__(self, properties, lora, buttonsEmulator):
+    def __init__(self, properties, lora, but):
         print(f"ELEV: Initializing elevator")
         #Get configuration from backend or file
         config = properties.get_elevator_configuration()
-        self.buttons_emulator = buttonsEmulator
+        self.buttons_emulator = but
         self.buttons_emulator.on_press = self.physic_button_floor_input
         
         try:
@@ -55,6 +58,7 @@ class Elevator(metaclass=SingletonMeta):
 
             self.calls_thread = self.thread_check_calls()
             self.voice_assistant = VoiceAssistant(self)
+            self.ventilation_manager = VentilationManager(self)
             self.code = properties.ELEVATOR_CODE
             self.lora = lora
 
@@ -76,7 +80,7 @@ class Elevator(metaclass=SingletonMeta):
     @property
     def overall_status(self):
         try:
-            return self.calls_thread.is_alive() and self.voice_assistant.status
+            return self.calls_thread.is_alive() and self.voice_assistant.status and self.ventilation_manager.status
         except Exception:
             return False
 
@@ -121,6 +125,7 @@ class Elevator(metaclass=SingletonMeta):
             print(f"ELEV: Elevator called in inactive floor {where}")
     
     def physic_button_floor_input(self):
+        print(f"ELEV: Botón pulsado")
         if self.waitingForInput:
             floor = random.randint(0,len(self.floors))
             print(f"PRESSED BUTTON, GOING TO {floor}")
@@ -205,6 +210,7 @@ class Elevator(metaclass=SingletonMeta):
         
         #Esperamos al llegar por si entra alguien después del que sale y acciona el input
         time.sleep(10)
+        print(f"ELEV: Elevator unlocked.")
     
     ## OTHERS
     def valid_floor_selection(self, voice, floor):
