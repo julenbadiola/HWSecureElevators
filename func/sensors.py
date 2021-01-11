@@ -1,5 +1,5 @@
 import sys
-import RPi.GPIO as GPIO
+from grove.gpio import GPIO
 from func.threading import threaded
 import time
 

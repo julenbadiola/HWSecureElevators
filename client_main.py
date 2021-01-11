@@ -6,7 +6,6 @@ from func import protocol as prot
 from func.threading import threaded
 from func.sensors import LED, GroveUltrasonicRanger, Button
 from properties.properties import PropertiesManager
-import RPi.GPIO as GPIO
 
 properties = PropertiesManager()
 lora_endpoint = LoraEndpoint()
@@ -62,7 +61,7 @@ def exit():
     print("STOP BLINK")
     led.stop_blink()
     print("CLEANING GPIOs")
-    GPIO.cleanup()
+    #GPIO.cleanup()
     print('Interrupted')
     try:
         sys.exit(0)
@@ -78,7 +77,8 @@ if __name__ == "__main__":
                 # TODO: if sensor proximidad detecta algo o el boton es presionado => call_elevator
                 dist = prox.get_distance()
                 print(f"DISTANCE: {dist} and BUTTON: {but.pressed}")
-                if but.pressed or dist < 2:
+                #if but.pressed or dist < 2:
+                if but.pressed:
                     call_elevator()
 
             except Exception as e:
