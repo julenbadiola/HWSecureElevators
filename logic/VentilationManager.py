@@ -24,4 +24,5 @@ class VentilationManager(metaclass=SingletonMeta):
             isInactive = (time.time() - self.elevator.last_ride_time) > 10
             isUnocuppied = (get_current_occupation() - 1) <= 0
             if not self.elevator.riding and isInactive and isUnocuppied:
-                print("VENTIL: Ventilating")
+                #print("VENTIL: Ventilating")
+                pass

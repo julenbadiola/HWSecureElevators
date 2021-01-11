@@ -9,7 +9,7 @@ sudo apt-get install -f ./libttspico0_1.0+git20130326-9_armhf.deb ./libttspico-u
 rm -f *.deb
 
 #Dependencies for voice recognition
-sudo apt-get install -y libatlas-base-dev libhdf5-dev libhdf5-serial-dev libatlas-base-dev libjasper-dev libqtgui4 libqt4-test libilmbase-dev libopenexr-dev libgstreamer1.0-dev libavcodec-dev libavformat-dev libswscale-dev libwebp-dev
+sudo apt-get install -y flac alsa-tools alsa-utils libatlas-base-dev libhdf5-dev libhdf5-serial-dev libatlas-base-dev libjasper-dev libqtgui4 libqt4-test libilmbase-dev libopenexr-dev libgstreamer1.0-dev libavcodec-dev libavformat-dev libswscale-dev libwebp-dev
 
 #Install required python packages
 pip3 install -r requirements.txt

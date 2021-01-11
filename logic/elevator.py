@@ -176,7 +176,7 @@ class Elevator(metaclass=SingletonMeta):
             print(f"ELEV: Capacity and floor validations succeeded.")
             diff = abs(self.where - floorToGo)
             self.close_doors()
-            self.voice_assistant.add_to_pool(f"Elevator going to {floorToGo}.")
+            self.voice_assistant.add_to_pool(f"Elevador yendo al piso {floorToGo}.")
             for i in range(0, diff):
                 time.sleep(3)
                 print(f"ELEV: Riding to {floorToGo}. Now in {i}")
@@ -209,7 +209,7 @@ class Elevator(metaclass=SingletonMeta):
             pass
         
         #Esperamos al llegar por si entra alguien después del que sale y acciona el input
-        time.sleep(10)
+        time.sleep(30)
         print(f"ELEV: Elevator unlocked.")
     
     ## OTHERS

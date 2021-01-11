@@ -65,7 +65,7 @@ if __name__ == "__main__":
                 # Emulador botón físico
                 # TODO: if sensor proximidad detecta algo o el boton es presionado => call_elevator
                 dist = prox.get_distance()
-                print(f"DISTANCE: {dist}")
+                print(f"DISTANCE: {dist} and BUTTON: {but.pressed}")
                 if but.pressed or dist < 2:
                     call_elevator()
 
