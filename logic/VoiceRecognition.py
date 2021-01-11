@@ -37,14 +37,17 @@ def cleanTextForNumbers(text):
 async def check_floor_and_ride(elevator, text):
     print(f"Recognizing {text}")
     floors = cleanTextForNumbers(text)
+    print(f"Floors {text}")
     if len(floors) > 1:
         #print(f'VOICEREC: {floors} detected in the speech.')
         floor = floors[0]
         
+        print(f"Recognized {floor}")
         if elevator.valid_floor_selection(True, floor):
-            confirmation = await wait_for_confirmation(f"ir al piso {floor}")
-            if confirmation:
-                return floor
+            """confirmation = await wait_for_confirmation(f"ir al piso {floor}")
+            if confirmation:"""
+            print(f"Valid {floor}")
+            return floor
     return None
 
 async def loop_voice_input(elevator):
@@ -58,7 +61,7 @@ async def loop_voice_input(elevator):
                         text = r.recognize_google(audio, language="es-ES")
                         print(text.lower())
                         
-                        if PM().SPEECH_KEYWORD.lower() in text.lower():
+                        if PM().SPEECH_KEYWORD.lower() in text.lower() or "pisos" in text.lower():
                             floor = await check_floor_and_ride(elevator, text)
                             if elevator.waitingForInput and floor != None:
                                 elevator.ride(True, floor)
