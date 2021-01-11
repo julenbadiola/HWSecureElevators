@@ -37,6 +37,8 @@ class LED(object):
                 time.sleep(1)
  
 class GroveButton(object):
+    pressed = False
+
     def __init__(self, pin):
         # High = pressed
         self.__btn = Factory.getButton("GPIO-HIGH", pin)
@@ -47,6 +49,7 @@ class GroveButton(object):
  
     @property
     def on_press(self):
+        self.pressed = True
         return self.__on_press
 
     @on_press.setter
@@ -57,10 +60,12 @@ class GroveButton(object):
  
     @property
     def on_release(self):
+        self.pressed = False
         return self.__on_release
  
     @on_release.setter
     def on_release(self, callback):
+
         if not callable(callback):
             return
         self.__on_release = callback

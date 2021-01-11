@@ -59,17 +59,16 @@ def listen_to_cabin():
 
 if __name__ == "__main__":
     print("Lora [OK]")
-    but.on_press = call_elevator
     while True:
         try:
             # Emulador botón físico
             # TODO: if sensor proximidad detecta algo o el boton es presionado => call_elevator
             dist = prox.get_distance()
             print(f"DISTANCE: {dist}")
-            if dist < 2:
+            if but.pressed or dist < 2:
                 call_elevator()
 
         except Exception as e:
             print(f"EXCEPTION IN thread_main {str(e)}")
 
-        time.sleep(2)
+        time.sleep(1)
